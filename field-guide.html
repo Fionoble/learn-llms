@@ -200,6 +200,20 @@ details.deeper .deep-body p+p{margin-top:.6rem}
 }
 .rel button:hover{border-color:var(--gold);color:var(--ink)}
 
+/* ---------- field work (exercises) ---------- */
+.fw-head{margin:2.8rem 0 1.1rem}
+.fw-kicker{font-size:.72rem;letter-spacing:.22em;text-transform:uppercase;color:var(--gold);font-weight:700;margin-bottom:.35rem}
+.fw-head h3{font-family:'Fraunces',Georgia,serif;font-weight:550;font-size:1.7rem;letter-spacing:-.01em}
+.fw-head p{color:var(--ink-soft);font-size:.88rem;max-width:56ch;margin-top:.3rem}
+.card.ex{border-left:3px solid var(--ember)}
+.card.ex .spec-id{color:var(--ember);width:3.4em}
+.card.ex.learned .spec-id{color:var(--moss)}
+.badges{display:flex;gap:.4rem;flex:none;align-self:center}
+.badge{font-size:.64rem;font-weight:700;letter-spacing:.07em;text-transform:uppercase;padding:.22rem .6rem;border-radius:99px;border:1px solid var(--line);color:var(--ink-soft);white-space:nowrap}
+ol.steps{margin:1rem 0 0 1.2rem;font-size:.91rem;max-width:64ch;display:flex;flex-direction:column;gap:.55rem}
+.trail i.ember{background:linear-gradient(90deg,var(--ember),var(--gold))}
+@media (max-width:840px){.badges{display:none}}
+
 code{
   font-family:ui-monospace,'SF Mono',Menlo,monospace;font-size:.86em;
   background:var(--paper-deep);padding:.1em .35em;border-radius:.3em;
@@ -245,6 +259,8 @@ code{
     <div class="progressbox">
       <div class="label"><span>Concepts collected</span><strong id="ptext">0 / 0</strong></div>
       <div class="trail"><i id="pbar" style="width:0%"></i></div>
+      <div class="label" style="margin-top:.6rem"><span>Field work done</span><strong id="xtext">0 / 0</strong></div>
+      <div class="trail"><i id="xbar" class="ember" style="width:0%"></i></div>
       <button class="reset" id="reset">Reset progress</button>
     </div>
   </aside>
@@ -311,6 +327,21 @@ const GUIDE = [
    why:'Embeddings power RAG (chapter III) — often the right tool when you thought you needed fine-tuning. Knowing which to reach for saves you weeks.',
    deeper:'<p>Dedicated embedding models turn text into vectors of a few hundred to a few thousand dimensions. You store them in a <b>vector database</b> and query with cosine similarity ("find the 5 chunks nearest this question").</p><p>Inside an LLM, every token is also an embedding — the first layer converts token IDs into vectors, and everything after that is vector math.</p>',
    rel:['rag','token']},
+],
+  ex:[
+  {id:'x-playground', title:'Watch a model learn', time:'20 min', level:'Gentle',
+   plain:'See loss, gradient descent, and overfitting happen live — no code, no setup.',
+   steps:'<li>Open <code>playground.tensorflow.org</code> in your browser.</li><li>Pick the spiral dataset (bottom left), press play, and watch the loss number fall as the decision boundary takes shape — that is gradient descent, visualized.</li><li>Now cause overfitting on purpose: set noise to 50, shrink the training data slider to 10%, add two more hidden layers, run again. Training loss keeps falling while test loss climbs — memorization in action.</li><li>Fix it the way practitioners do: more data, less capacity, or stop earlier.</li>',
+   hint:'<p>The two curves you just watched (train loss vs. test loss) are exactly the pair you’ll monitor when fine-tuning in Chapter IV. Same shapes, same diagnosis, higher stakes.</p>',
+   rel:['loss','gradient','overfitting']},
+  {id:'x-embed', title:'Touch real embeddings', time:'30 min', level:'Hands-on',
+   plain:'Turn sentences into vectors on your own machine and measure meaning as distance.',
+   steps:'<li>Install Ollama from <code>ollama.com</code>, then <code>ollama pull nomic-embed-text</code>.</li><li>Get your first vector: <code>curl http://localhost:11434/api/embeddings -d \'{"model":"nomic-embed-text","prompt":"the bank of the river"}\'</code></li><li>In a short Python script, embed five sentences — two about money, two about rivers, one about pizza — and compute cosine similarity between every pair.</li><li>Confirm the money pair scores highest together and pizza sits alone. You just built the beating heart of every RAG system.</li>',
+   rel:['embeddings','rag']},
+  {id:'x-split', title:'The honest split', time:'15 min', level:'Gentle',
+   plain:'Practice the discipline that keeps you from fooling yourself — on paper.',
+   steps:'<li>Write 20 one-line examples of a task you care about (e.g., plain-English request → the GraphQL query you’d want).</li><li>Shuffle them and set the last 4 aside — your held-out test set. No peeking at those while you tinker with the other 16.</li><li>Hunt for leakage: is any of the 4 a near-duplicate of the 16? Swap it out.</li><li>Keep this file — it becomes seed material for your first eval and your first dataset later in the guide.</li>',
+   rel:['splits','evals']},
 ]},
 {
   numeral:'II', slug:'llms', title:'How LLMs Work',
@@ -370,6 +401,24 @@ const GUIDE = [
    why:'The flip side matters more to you: for a narrow task, scale is substitutable — a small model plus your targeted data can match a giant model at that one thing, at 1% of the cost.',
    deeper:'<p>The <b>Chinchilla</b> finding (2022): most big models had too many parameters for too little data; compute is better spent on more tokens. Since then, small models trained on enormous data (Llama-class 8B models see 15T+ tokens) have become shockingly capable — which is precisely why the micro-expert strategy works now and didn’t work in 2021.</p>',
    rel:['params','microexperts-why']},
+],
+  ex:[
+  {id:'x-tokens', title:'See text the way models do', time:'15 min', level:'Hands-on',
+   plain:'Count tokens in English, code, and emoji — and watch words shatter into chunks.',
+   steps:'<li><code>pip install tiktoken</code>, then in Python: <code>import tiktoken; enc = tiktoken.get_encoding("cl100k_base")</code>.</li><li>Compare <code>len(enc.encode(…))</code> for: an English sentence, the same idea as a GraphQL query, a long URL, and a few emoji.</li><li>See the actual chunks: <code>[enc.decode([t]) for t in enc.encode("internationalization")]</code>.</li><li>Estimate how many tokens one of your typical source files is — then check. Calibrating this instinct pays off forever.</li>',
+   rel:['token','context']},
+  {id:'x-temp', title:'Play the temperature dial', time:'20 min', level:'Hands-on',
+   plain:'Same prompt, three runs, two temperatures — determinism vs. creativity, felt directly.',
+   steps:'<li>Run the same prompt three times at temperature 0: <code>curl http://localhost:11434/api/generate -d \'{"model":"llama3.2","prompt":"Name a color and a fruit.","stream":false,"options":{"temperature":0}}\'</code> — identical answers every time.</li><li>Change to <code>"temperature":1.4</code> and run three more — looser, different every run.</li><li>Decide which end of the dial you’d use for generating GraphQL, and which for brainstorming product names. Write the rule down.</li>',
+   rel:['sampling']},
+  {id:'x-middle', title:'Lost in the middle', time:'20 min', level:'Hands-on',
+   plain:'Map a real model’s attention bias by burying a fact and seeing if it survives.',
+   steps:'<li>Take a long article and plant one invented, checkable fact in the middle: “The project’s internal codename was HELIOTROPE.”</li><li>Paste the whole thing to a small local model and ask three questions: about the beginning, about your planted fact, about the end.</li><li>Score it, then repeat with the fact moved near the top. Most small models improve noticeably — you’ve just measured the “lost in the middle” effect yourself.</li>',
+   rel:['context','attention']},
+  {id:'x-halluc', title:'Manufacture a hallucination, then cure it', time:'15 min', level:'Gentle',
+   plain:'Trigger confident fiction on demand — then test two remedies.',
+   steps:'<li>Ask a small local model: “What does the <code>quixotl</code> npm package do?” It doesn’t exist. Watch the confident, detailed answer arrive anyway.</li><li>Cure #1 — permission to abstain: add “If you are not certain this package exists, say so.” and ask again.</li><li>Cure #2 — grounding: paste the real README of a real package and ask about that one, adding “answer only from the text above.”</li><li>Note which cure worked better on your model. That comparison is the entire argument for RAG, in miniature.</li>',
+   rel:['hallucination','rag']},
 ]},
 {
   numeral:'III', slug:'using', title:'Using Models Well',
@@ -429,6 +478,24 @@ const GUIDE = [
    why:'This is the single highest-leverage habit for your goal. You cannot fine-tune well without an eval — you’d have no way to know whether version 2 of your micro-expert is better or worse than version 1.',
    deeper:'<p>Three grading styles: <b>exact/programmatic</b> (does the JSON parse? does the code compile? do the tests pass?) — perfect for code-generating experts; <b>LLM-as-judge</b> (a strong model grades subjective quality against a rubric); <b>human review</b> (gold standard, expensive, use sparingly).</p><p>Start embarrassingly small: 20 real tasks in a file, a script that runs them, a score at the end. Grow it every time you find a failure. Chapter VI builds on this heavily.</p>',
    rel:['splits','task-evals']},
+],
+  ex:[
+  {id:'x-modelfile', title:'Your first specialist — zero training', time:'20 min', level:'Hands-on',
+   plain:'Bake a GraphQL system prompt into a named local model with an Ollama Modelfile.',
+   steps:'<li>Create a file named <code>Modelfile</code>:<br><code>FROM llama3.2</code><br><code>SYSTEM You are a senior GraphQL engineer. Output only valid GraphQL. Never invent fields not present in the provided schema. If no schema was provided, ask for one.</code></li><li>Run <code>ollama create graphql-helper -f Modelfile</code>, then <code>ollama run graphql-helper</code>.</li><li>Test it against a small real schema with three requests of rising difficulty.</li><li>Save every failure it produces — those are future eval cases and training data.</li>',
+   rel:['system','ollama']},
+  {id:'x-fewshot', title:'Few-shot A/B test', time:'30 min', level:'Hands-on',
+   plain:'Measure — don’t vibe — whether worked examples beat instructions.',
+   steps:'<li>Pick a formatting task you actually do, e.g. messy change description → conventional commit message.</li><li>Round A: instructions only. Round B: the same instructions plus three worked examples. Run 10 fresh inputs through each round.</li><li>Score both on format-correctness. Few-shot usually wins visibly — and now you also know what those examples cost in tokens on every call.</li>',
+   rel:['fewshot','prompting']},
+  {id:'x-mini-eval', title:'A ten-case eval in one file', time:'45 min', level:'Keystone',
+   plain:'The single highest-leverage exercise in this guide. Everything later plugs into it.',
+   steps:'<li>Write ten test cases for one task as JSON lines: <code>{"input":"…","must_contain":"…"}</code> — or a regex, or a parse-check.</li><li>Write a ~30-line script: loop over cases → call <code>http://localhost:11434</code> → check each output → print a score like <code>7/10</code>.</li><li>Run it against two different local models and compare. You now hold opinions backed by numbers.</li><li>Keep this script forever. Chapters IV–VI all assume it exists.</li>',
+   rel:['evals','task-evals']},
+  {id:'x-pocket-rag', title:'Pocket RAG', time:'45 min', level:'Hands-on',
+   plain:'A working retrieval pipeline over your own notes, in under a hundred lines.',
+   steps:'<li>Take 8–10 paragraphs of your own notes or docs and embed each one (skills from exercise F02 in chapter I).</li><li>For a question: embed it too, rank paragraphs by cosine similarity, keep the top two.</li><li>Prompt: “Answer using only the text below. If the answer isn’t there, say so.” + the two paragraphs + the question.</li><li>Now ask something your notes don’t cover — and confirm it abstains instead of inventing. That refusal is the feature.</li>',
+   rel:['rag','embeddings','hallucination']},
 ]},
 {
   numeral:'IV', slug:'finetuning', title:'Fine-Tuning',
@@ -494,6 +561,25 @@ const GUIDE = [
    why:'Advanced move for later: when your micro-expert is decent but makes characteristic mistakes, DPO on "correct vs. typical-mistake" pairs polishes exactly that behavior.',
    deeper:'<p>RLHF (used to align major assistants) trains a separate reward model on human preferences, then optimizes the LLM against it with PPO — powerful, finicky, infrastructure-heavy. <b>DPO</b> (2023) reframed alignment as a simple loss over preference pairs: no reward model, no RL loop, works in the same tooling as SFT. Your failed eval cases are a natural source of preference pairs: model’s wrong answer = rejected, your correction = chosen.</p>',
    rel:['sft','evals','iterate']},
+],
+  ex:[
+  {id:'x-dataset', title:'Build a fifty-example dataset', time:'60–90 min', level:'Keystone',
+   plain:'Hand-craft the small, clean dataset your first fine-tune will learn from.',
+   steps:'<li>Choose one narrow behavior — e.g., plain-English request + schema → GraphQL query.</li><li>Write 50 lines of chat-format JSONL: <code>{"messages":[{"role":"user","content":"…"},{"role":"assistant","content":"…"}]}</code> — every assistant reply exactly as you’d want it, no exceptions.</li><li>Apply the curation checklist from the “Training data curation” card: correct, consistent, varied, deduplicated.</li><li>Split: 45 lines → <code>train.jsonl</code>, 5 → <code>valid.jsonl</code>.</li>',
+   rel:['data','sft','splits']},
+  {id:'x-first-lora', title:'First LoRA on your Mac', time:'60 min', level:'Keystone',
+   plain:'Actually fine-tune a model, today, on the laptop you already own.',
+   steps:'<li><code>pip install mlx-lm</code></li><li>Train on your dataset: <code>mlx_lm.lora --model mlx-community/Llama-3.2-3B-Instruct-4bit --train --data . --iters 300</code> (expects <code>train.jsonl</code> / <code>valid.jsonl</code> in the data folder).</li><li>Watch the printed losses: falling fast, then flattening, is healthy. Note where validation loss bottoms out.</li><li>Talk to your creation: <code>mlx_lm.generate --model mlx-community/Llama-3.2-3B-Instruct-4bit --adapter-path adapters --prompt "…"</code></li>',
+   hint:'<p>Memory trouble? Drop to a 1B model, add <code>--batch-size 1</code>, or shorten your examples. A tiny successful run beats an ambitious crash — you can scale up after the loop works end to end.</p>',
+   rel:['qlora','mlx','hyperparams']},
+  {id:'x-overfit', title:'Overfit on purpose', time:'30 min', level:'Hands-on',
+   plain:'Deliberately cause the classic failure so you’ll recognize it forever.',
+   steps:'<li>Make a tiny 15-example training file and train it far too hard: <code>--iters 1000</code>.</li><li>Prompt with an exact training input: flawless answer. Prompt with a slight rephrase: watch it wobble — or parrot a memorized response verbatim.</li><li>Find the iteration in the logs where validation loss turned upward. That was the moment to stop.</li><li>You will never skip a validation set again.</li>',
+   rel:['overfitting','loss','forgetting']},
+  {id:'x-showdown', title:'Adapter vs. base showdown', time:'20 min', level:'Hands-on',
+   plain:'Prove (or disprove) that your fine-tune actually beats the base model.',
+   steps:'<li>Collect 5 prompts the model has never seen — rephrasings of held-out cases.</li><li>Run each against the plain base and against base + adapter (same command, with and without <code>--adapter-path</code>).</li><li>Grade blind: shuffle the outputs so you don’t know which model wrote what, then score. If your ten-case eval script fits the task, use that instead of eyeballs.</li>',
+   rel:['evals','lora']},
 ]},
 {
   numeral:'V', slug:'local', title:'Running Models Locally',
@@ -553,6 +639,24 @@ const GUIDE = [
    why:'The base model is the raw material of every micro-expert. A coder-family 3B base will out-learn a generalist 7B on GraphQL — better results and faster training.',
    deeper:'<p>Checklist: (1) <b>size</b> — can you train it and will inference be fast enough? (2) <b>domain pedigree</b> — code-specialized bases for code experts; (3) <b>benchmarks in your area</b> — treat with suspicion, contamination is rampant; (4) <b>ecosystem</b> — GGUF/MLX availability, community fine-tunes as proof of trainability; (5) <b>license</b>; (6) finally, run your 20-case eval on 2–3 candidates and let the numbers pick. The best base for <em>your</em> task is an empirical question, and you now own the instrument that answers it.</p>',
    rel:['openweights','evals','recipe']},
+],
+  ex:[
+  {id:'x-server', title:'Stand up your model server', time:'20 min', level:'Gentle',
+   plain:'Two models pulled, running, and measured on your own machine.',
+   steps:'<li>Install Ollama, then pull a small/mid pair: <code>ollama pull llama3.2:3b</code> and <code>ollama pull qwen3:8b</code> (or the current equivalents).</li><li>Chat with each; then run <code>ollama ps</code> to see actual memory in use.</li><li>Run <code>ollama run llama3.2:3b --verbose</code> and note tokens/second; repeat for the 8B. Feel the size/speed trade directly.</li>',
+   rel:['ollama','model-size']},
+  {id:'x-napkin', title:'Napkin math, then verify', time:'20 min', level:'Gentle',
+   plain:'Predict each model’s memory footprint from first principles — then check your work.',
+   steps:'<li>For each model you pulled, predict memory: parameters × bits-per-weight ÷ 8, plus ~15% overhead.</li><li>Verify against <code>ollama ps</code>. Landing within ~20% means you own the formula.</li><li>Now compute the largest model your Mac can hold at 4-bit with 8k context while leaving 8 GB for the OS. That number is your local ceiling — write it down.</li>',
+   rel:['memory-math','quantization']},
+  {id:'x-quant', title:'Quantization taste test', time:'30 min', level:'Hands-on',
+   plain:'Same model, two precisions — find out what quality the missing bits were holding.',
+   steps:'<li>Pull the same model at two quantizations, e.g. a <code>q4_K_M</code> and a <code>q8_0</code> tag (check the model’s tags page on <code>ollama.com</code> for exact names).</li><li>Run your ten-case eval script against both; also record tokens/sec and memory from <code>ollama ps</code>.</li><li>Decide: is the Q8 quality difference worth twice the memory <em>for your task</em>? There is no universal answer — only your measured one.</li>',
+   rel:['quantization','evals']},
+  {id:'x-wire', title:'Wire it into a real tool', time:'30 min', level:'Hands-on',
+   plain:'A local model becomes infrastructure the moment something else calls it.',
+   steps:'<li>Ollama speaks the OpenAI API at <code>http://localhost:11434/v1</code> (any string works as the API key).</li><li>Point something you already use at it: a three-line Python client, the <code>llm</code> CLI, or your editor’s “custom OpenAI endpoint” setting.</li><li>Use it for one recurring task for a full day. Notice how “private, free, always available” changes how often you reach for a model.</li>',
+   rel:['serving','ollama']},
 ]},
 {
   numeral:'VI', slug:'microexperts', title:'Building Micro-Experts',
@@ -606,22 +710,46 @@ const GUIDE = [
    why:'This loop is the durable moat — the model is replaceable, the base will change, but your eval + dataset improve monotonically and transfer to every future base model.',
    deeper:'<p>Make capture frictionless: a one-keystroke way to flag a bad output (append to a <code>failures.jsonl</code>) determines whether the loop actually runs. Periodically: triage failures into <em>data gaps</em> (add examples), <em>task creep</em> (out of scope — route elsewhere or split off expert #2), and <em>base limits</em> (time to try a newer/bigger base).</p><p>When a new base model family lands, your assets carry over: re-run the same training data and eval against it, compare, migrate if it wins. That’s the quiet superpower of owning the data and the eval rather than the model.</p>',
    rel:['task-evals','preference','data']},
+],
+  ex:[
+  {id:'x-exam', title:'Write the exam first', time:'90 min', level:'Keystone',
+   plain:'Your GraphQL expert’s definition of “better,” created before any training happens.',
+   steps:'<li>Define the scope in one sentence: “given a schema and a request, write a correct, idiomatic GraphQL operation.”</li><li>Create 25 cases across easy / medium / hard: input schema, request, and the expected operation (or the properties it must have).</li><li>Grade automatically: parse with <code>graphql-core</code> (Python) or <code>graphql</code> (JS), validate against the schema, check the requested fields appear.</li><li>Wrap it in one command that prints a score. This file now outranks your intuition.</li>',
+   rel:['task-evals','evals']},
+  {id:'x-baseline', title:'Baseline day', time:'45 min', level:'Hands-on',
+   plain:'Score off-the-shelf models with good prompting — the bar your fine-tune must clear.',
+   steps:'<li>Run your exam against 2–3 small models (3B–8B class) under three conditions: plain prompt, your best system prompt, and system prompt + 3 few-shot examples.</li><li>Record every score in a table: model × prompting strategy.</li><li>The best cell is your baseline. If it’s already ≥90%, celebrate and stop — the eval just saved you a month of unnecessary fine-tuning.</li>',
+   rel:['choosing','prompting','fewshot']},
+  {id:'x-factory', title:'Synthetic data factory', time:'90 min', level:'Keystone',
+   plain:'Seed, generate, validate: manufacture hundreds of training examples you can trust.',
+   steps:'<li>Hand-write 15 gold examples — your best work; the standard everything generated must match.</li><li>Prompt a strong model to generate variations in batches of 20: new schemas, new phrasings, easy through hard, with explicit diversity instructions.</li><li>Filter ruthlessly: auto-validate every sample with your parser + schema check, dedupe, then eyeball 30 random survivors.</li><li>Target 300–500 validated examples; split off a validation set. Not one unvalidated sample gets through.</li>',
+   rel:['synthetic','distillation','data']},
+  {id:'x-ship', title:'Capstone: ship graphql-expert:v1', time:'multi-day', level:'Capstone',
+   plain:'The whole guide, converged into one shipped artifact you use every day.',
+   steps:'<li><b>Train</b>: QLoRA on your validated dataset — <code>mlx_lm.lora</code>, rank 16, watching validation loss.</li><li><b>Judge</b>: run the exam; compare against baseline day’s best cell; inspect every failure by hand.</li><li><b>Ship</b>: <code>mlx_lm.fuse</code> to merge the adapter → convert to GGUF → <code>ollama create graphql-expert:v1</code>.</li><li><b>Loop</b>: use it daily; append every miss to <code>failures.jsonl</code>; at 30+ misses, fold them into the dataset and train v2. Ten loops from now, nothing off the shelf will match it.</li>',
+   rel:['recipe','iterate','serving']},
 ]},
 ];
 
 /* ---------- state ---------- */
-const LS_KEY='mlfg-learned-v1';
+const LS_KEY='mlfg-learned-v1', XS_KEY='mlfg-fieldwork-v1';
 let learned=new Set(JSON.parse(localStorage.getItem(LS_KEY)||'[]'));
+let done=new Set(JSON.parse(localStorage.getItem(XS_KEY)||'[]'));
 let current=0, query='';
 const ALL=GUIDE.flatMap((c,ci)=>c.topics.map((t,ti)=>({...t,ci,ti})));
+const ALLX=GUIDE.flatMap((c,ci)=>(c.ex||[]).map((x,xi)=>({...x,ci,xi,isEx:true})));
 const byId=Object.fromEntries(ALL.map(t=>[t.id,t]));
-const total=ALL.length;
+ALLX.forEach(x=>{byId[x.id]=x});
+const total=ALL.length, totalx=ALLX.length;
 
 const nav=document.getElementById('nav');
 const main=document.getElementById('main');
 const searchEl=document.getElementById('search');
 
-function save(){localStorage.setItem(LS_KEY,JSON.stringify([...learned]))}
+function save(){
+  localStorage.setItem(LS_KEY,JSON.stringify([...learned]));
+  localStorage.setItem(XS_KEY,JSON.stringify([...done]));
+}
 function esc(s){return s.replace(/&/g,'&amp;').replace(/</g,'&lt;')}
 
 function renderNav(){
@@ -636,6 +764,9 @@ function renderNav(){
   const n=learned.size;
   document.getElementById('ptext').textContent=`${n} / ${total}`;
   document.getElementById('pbar').style.width=(n/total*100)+'%';
+  const nx=done.size;
+  document.getElementById('xtext').textContent=`${nx} / ${totalx}`;
+  document.getElementById('xbar').style.width=(totalx?nx/totalx*100:0)+'%';
 }
 
 function cardHTML(t,num){
@@ -662,16 +793,45 @@ function cardHTML(t,num){
   </article>`;
 }
 
+function exHTML(x,num){
+  const open=x._open?'open':'', l=done.has(x.id)?'learned':'';
+  const rel=(x.rel||[]).filter(r=>byId[r]);
+  return `<article class="card ex ${open} ${l}" id="card-${x.id}">
+    <button class="card-head" data-toggle="${x.id}" aria-expanded="${!!x._open}">
+      <span class="spec-id">${num}</span>
+      <span class="headmain">
+        <div class="term">${x.title}</div>
+        <div class="plain">${x.plain}</div>
+      </span>
+      <span class="badges"><span class="badge">${x.time}</span><span class="badge">${x.level}</span></span>
+      <span class="chev">▸</span>
+    </button>
+    <div class="card-body">
+      <ol class="steps">${x.steps}</ol>
+      ${x.hint?`<details class="deeper"><summary>Hint</summary><div class="deep-body">${x.hint}</div></details>`:''}
+      <div class="card-foot">
+        <button class="learn-btn" data-learn="${x.id}">${done.has(x.id)?'Done ✓':'Mark complete'}</button>
+        ${rel.length?`<div class="rel">${rel.map(r=>`<button data-goto="${r}">${byId[r].term||byId[r].title}</button>`).join('')}</div>`:''}
+      </div>
+    </div>
+  </article>`;
+}
+
+const exNum=(x)=>GUIDE[x.ci].numeral+'·F'+String(x.xi+1).padStart(2,'0');
+
 function renderMain(){
   if(query){
     const q=query.toLowerCase();
     const hits=ALL.filter(t=>(t.term+' '+t.plain+' '+t.gist+' '+(t.deeper||'')).toLowerCase().includes(q));
+    const xhits=ALLX.filter(x=>(x.title+' '+x.plain+' '+x.steps+' '+(x.hint||'')).toLowerCase().includes(q));
     main.innerHTML=`<div class="chapter-head">
       <div class="kicker">Search</div>
       <h2>“${esc(query)}”</h2>
-      <p>${hits.length} concept${hits.length===1?'':'s'} found across the guide.</p>
+      <p>${hits.length} concept${hits.length===1?'':'s'} and ${xhits.length} exercise${xhits.length===1?'':'s'} found across the guide.</p>
     </div>
-    <div class="cards">${hits.map(t=>cardHTML(t,GUIDE[t.ci].numeral+'·'+String(t.ti+1).padStart(2,'0'))).join('')||'<p class="empty">Nothing in the guide matches that — yet.</p>'}</div>`;
+    <div class="cards">${hits.map(t=>cardHTML(t,GUIDE[t.ci].numeral+'·'+String(t.ti+1).padStart(2,'0'))).join('')||(xhits.length?'':'<p class="empty">Nothing in the guide matches that — yet.</p>')}</div>
+    ${xhits.length?`<div class="fw-head"><div class="fw-kicker">Field work</div></div>
+    <div class="cards">${xhits.map(x=>exHTML(x,exNum(x))).join('')}</div>`:''}`;
   }else{
     const c=GUIDE[current];
     const prev=GUIDE[current-1], next=GUIDE[current+1];
@@ -681,6 +841,12 @@ function renderMain(){
       <p>${c.desc}</p>
     </div>
     <div class="cards">${c.topics.map((t,i)=>cardHTML(t,c.numeral+'·'+String(i+1).padStart(2,'0'))).join('')}</div>
+    ${c.ex&&c.ex.length?`<div class="fw-head">
+      <div class="fw-kicker">Field work · ${c.ex.length} exercise${c.ex.length===1?'':'s'}</div>
+      <h3>Now get your hands dirty</h3>
+      <p>Reading builds a map; doing builds the territory. Each exercise is designed to be finished in one sitting on your own machine.</p>
+    </div>
+    <div class="cards">${c.ex.map(x0=>{const x=byId[x0.id];return exHTML(x,exNum(x))}).join('')}</div>`:''}
     <div class="pager">
       ${prev?`<button data-nav="${current-1}"><span>← Previous</span>${prev.title}</button>`:'<span></span>'}
       ${next?`<button class="next" data-nav="${current+1}"><span>Next →</span>${next.title}</button>`:''}
@@ -699,10 +865,12 @@ document.addEventListener('click',e=>{
   else if(el.dataset.toggle){const t=byId[el.dataset.toggle];t._open=!t._open;
     const card=document.getElementById('card-'+t.id);card.classList.toggle('open',t._open);
     el.setAttribute('aria-expanded',t._open);}
-  else if(el.dataset.learn){const id=el.dataset.learn;
-    learned.has(id)?learned.delete(id):learned.add(id);save();
-    const card=document.getElementById('card-'+id);card.classList.toggle('learned',learned.has(id));
-    el.textContent=learned.has(id)?'Collected ✓':'Mark as learned';renderNav();}
+  else if(el.dataset.learn){const id=el.dataset.learn;const t=byId[id];
+    const set=t.isEx?done:learned;
+    set.has(id)?set.delete(id):set.add(id);save();
+    const card=document.getElementById('card-'+id);card.classList.toggle('learned',set.has(id));
+    el.textContent=set.has(id)?(t.isEx?'Done ✓':'Collected ✓'):(t.isEx?'Mark complete':'Mark as learned');
+    renderNav();}
   else if(el.dataset.goto){const t=byId[el.dataset.goto];query='';searchEl.value='';
     current=t.ci;t._open=true;render();
     document.getElementById('card-'+t.id).scrollIntoView({behavior:'smooth',block:'center'});}
@@ -714,7 +882,7 @@ document.addEventListener('keydown',e=>{
   if(e.key==='Escape'&&query){query='';searchEl.value='';render();}
 });
 document.getElementById('reset').addEventListener('click',()=>{
-  if(confirm('Clear all collected-concept progress?')){learned.clear();save();render();}
+  if(confirm('Clear all concept and field-work progress?')){learned.clear();done.clear();save();render();}
 });
 
 render();
