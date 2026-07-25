@@ -1,0 +1,723 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>A Field Guide to Machine Learning</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🌿</text></svg>">
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,340..700;1,9..144,340..700&family=Public+Sans:ital,wght@0,400;0,500;0,600;0,700;1,400&display=swap');
+
+:root{
+  --paper:#F5F0E4;
+  --paper-deep:#EDE6D4;
+  --card:#FBF8F0;
+  --ink:#23261B;
+  --ink-soft:#5A5C4E;
+  --line:#D6CDB4;
+  --moss:#44603C;
+  --moss-soft:#DCE3D2;
+  --ember:#C05B33;
+  --ember-soft:#F3DDCF;
+  --gold:#9A7B2D;
+  --shadow:0 1px 2px rgba(35,38,27,.06), 0 6px 18px -8px rgba(35,38,27,.18);
+}
+@media (prefers-color-scheme: dark){
+  :root{
+    --paper:#171A12;
+    --paper-deep:#12140D;
+    --card:#1F2318;
+    --ink:#EAE4D2;
+    --ink-soft:#A6A38E;
+    --line:#3A3E2C;
+    --moss:#9DBB8E;
+    --moss-soft:#28331F;
+    --ember:#E0805A;
+    --ember-soft:#3C2417;
+    --gold:#CBA84F;
+    --shadow:0 1px 2px rgba(0,0,0,.3), 0 8px 22px -10px rgba(0,0,0,.55);
+  }
+}
+
+*{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{
+  font-family:'Public Sans',-apple-system,sans-serif;
+  background:var(--paper);
+  color:var(--ink);
+  line-height:1.55;
+  background-image:
+    radial-gradient(circle at 15% 10%, rgba(154,123,45,.05), transparent 40%),
+    radial-gradient(circle at 85% 90%, rgba(68,96,60,.06), transparent 45%);
+  min-height:100vh;
+}
+::selection{background:var(--ember);color:var(--paper)}
+
+.layout{display:grid;grid-template-columns:300px 1fr;max-width:1200px;margin:0 auto;min-height:100vh}
+
+/* ---------- sidebar ---------- */
+aside{
+  border-right:1px solid var(--line);
+  padding:2.2rem 1.6rem 2rem;
+  position:sticky;top:0;height:100vh;overflow-y:auto;
+  display:flex;flex-direction:column;gap:1.4rem;
+}
+.masthead h1{
+  font-family:'Fraunces',Georgia,serif;
+  font-weight:600;font-size:1.7rem;line-height:1.12;
+  letter-spacing:-.01em;
+}
+.masthead h1 em{font-style:italic;color:var(--moss)}
+.masthead .sub{
+  margin-top:.55rem;font-size:.78rem;color:var(--ink-soft);
+  text-transform:uppercase;letter-spacing:.14em;font-weight:600;
+}
+.rule{border:none;border-top:1px solid var(--line);position:relative}
+.rule::after{
+  content:'❦';position:absolute;left:50%;top:-.72em;transform:translateX(-50%);
+  background:var(--paper);padding:0 .6em;color:var(--gold);font-size:.85rem;
+}
+.searchwrap{position:relative}
+.searchwrap input{
+  width:100%;padding:.6rem .85rem .6rem 2.1rem;
+  font:inherit;font-size:.85rem;
+  background:var(--card);color:var(--ink);
+  border:1px solid var(--line);border-radius:.55rem;outline:none;
+  transition:border-color .15s;
+}
+.searchwrap input:focus{border-color:var(--moss)}
+.searchwrap::before{
+  content:'⌕';position:absolute;left:.7rem;top:50%;transform:translateY(-54%);
+  color:var(--ink-soft);font-size:1.05rem;
+}
+.searchwrap kbd{
+  position:absolute;right:.6rem;top:50%;transform:translateY(-50%);
+  font-family:inherit;font-size:.62rem;color:var(--ink-soft);
+  border:1px solid var(--line);border-radius:.3rem;padding:.08rem .38rem;
+  background:var(--paper);
+}
+nav{display:flex;flex-direction:column;gap:.15rem}
+nav button{
+  all:unset;cursor:pointer;display:flex;align-items:baseline;gap:.7rem;
+  padding:.52rem .65rem;border-radius:.5rem;font-size:.86rem;
+  transition:background .12s;
+}
+nav button:hover{background:var(--paper-deep)}
+nav button.active{background:var(--moss-soft)}
+nav button .numeral{
+  font-family:'Fraunces',Georgia,serif;font-style:italic;
+  color:var(--gold);width:1.5em;flex:none;font-size:.9rem;
+}
+nav button.active .numeral{color:var(--moss)}
+nav button .t{flex:1;font-weight:500}
+nav button .n{font-size:.68rem;color:var(--ink-soft);font-variant-numeric:tabular-nums}
+nav button .n.done{color:var(--moss);font-weight:700}
+
+.progressbox{margin-top:auto;font-size:.75rem;color:var(--ink-soft)}
+.progressbox .label{display:flex;justify-content:space-between;margin-bottom:.4rem;letter-spacing:.05em}
+.trail{height:6px;background:var(--paper-deep);border-radius:99px;overflow:hidden;border:1px solid var(--line)}
+.trail i{display:block;height:100%;background:linear-gradient(90deg,var(--moss),var(--gold));border-radius:99px;transition:width .5s cubic-bezier(.22,1,.36,1)}
+.reset{all:unset;cursor:pointer;font-size:.68rem;color:var(--ink-soft);margin-top:.55rem;text-decoration:underline;text-underline-offset:2px}
+.reset:hover{color:var(--ember)}
+
+/* ---------- main ---------- */
+main{padding:2.6rem 3rem 5rem;min-width:0}
+.chapter-head{margin-bottom:1.9rem;animation:rise .45s cubic-bezier(.22,1,.36,1) both}
+.chapter-head .kicker{
+  font-size:.72rem;letter-spacing:.22em;text-transform:uppercase;
+  color:var(--ember);font-weight:700;margin-bottom:.5rem;
+}
+.chapter-head h2{
+  font-family:'Fraunces',Georgia,serif;font-weight:550;font-size:2.5rem;
+  line-height:1.05;letter-spacing:-.015em;margin-bottom:.7rem;
+}
+.chapter-head p{max-width:56ch;color:var(--ink-soft);font-size:.95rem}
+
+.cards{display:flex;flex-direction:column;gap:.65rem}
+.card{
+  background:var(--card);border:1px solid var(--line);border-radius:.75rem;
+  box-shadow:var(--shadow);overflow:hidden;
+  animation:rise .5s cubic-bezier(.22,1,.36,1) both;
+}
+.card:nth-child(1){animation-delay:.02s}.card:nth-child(2){animation-delay:.05s}
+.card:nth-child(3){animation-delay:.08s}.card:nth-child(4){animation-delay:.11s}
+.card:nth-child(5){animation-delay:.14s}.card:nth-child(6){animation-delay:.17s}
+.card:nth-child(7){animation-delay:.2s}.card:nth-child(8){animation-delay:.23s}
+.card:nth-child(9){animation-delay:.26s}.card:nth-child(10){animation-delay:.29s}
+@keyframes rise{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
+
+.card-head{
+  all:unset;cursor:pointer;display:flex;align-items:baseline;gap:1rem;
+  padding:1rem 1.25rem;width:100%;box-sizing:border-box;
+}
+.card-head:hover{background:color-mix(in srgb, var(--card) 70%, var(--paper-deep))}
+.spec-id{
+  font-family:'Fraunces',Georgia,serif;font-style:italic;font-size:.8rem;
+  color:var(--gold);flex:none;width:2.6em;font-variant-numeric:tabular-nums;
+}
+.card.learned .spec-id{color:var(--moss)}
+.term{font-family:'Fraunces',Georgia,serif;font-weight:600;font-size:1.12rem;letter-spacing:-.005em}
+.card.learned .term::after{
+  content:'✓';margin-left:.5em;color:var(--moss);font-family:'Public Sans',sans-serif;
+  font-size:.85em;font-weight:700;
+}
+.plain{color:var(--ink-soft);font-size:.86rem;margin-top:.15rem}
+.headmain{flex:1;min-width:0}
+.chev{flex:none;color:var(--ink-soft);font-size:.8rem;transition:transform .25s;align-self:center}
+.card.open .chev{transform:rotate(90deg)}
+
+.card-body{display:none;padding:0 1.25rem 1.25rem 1.25rem;border-top:1px dashed var(--line)}
+.card.open .card-body{display:block;animation:rise .3s cubic-bezier(.22,1,.36,1) both}
+.card-body .gist{padding:1rem 0 0;font-size:.93rem;max-width:64ch}
+.why{
+  margin-top:.9rem;padding:.7rem .9rem;border-left:3px solid var(--ember);
+  background:var(--ember-soft);border-radius:0 .5rem .5rem 0;
+  font-size:.84rem;max-width:64ch;
+}
+.why b{color:var(--ember);font-weight:700;letter-spacing:.04em;font-size:.72rem;text-transform:uppercase;display:block;margin-bottom:.15rem}
+details.deeper{margin-top:.9rem;max-width:64ch}
+details.deeper summary{
+  cursor:pointer;list-style:none;display:inline-flex;align-items:center;gap:.45rem;
+  font-size:.8rem;font-weight:700;color:var(--moss);letter-spacing:.06em;text-transform:uppercase;
+}
+details.deeper summary::-webkit-details-marker{display:none}
+details.deeper summary::before{content:'▸';transition:transform .2s;font-size:.75rem}
+details.deeper[open] summary::before{transform:rotate(90deg)}
+details.deeper .deep-body{padding:.7rem 0 0;font-size:.9rem;color:var(--ink)}
+details.deeper .deep-body p+p{margin-top:.6rem}
+.card-foot{display:flex;align-items:center;gap:.7rem;margin-top:1.1rem;flex-wrap:wrap}
+.learn-btn{
+  all:unset;cursor:pointer;font-size:.78rem;font-weight:700;
+  padding:.42rem .95rem;border-radius:99px;border:1.5px solid var(--moss);
+  color:var(--moss);letter-spacing:.03em;transition:all .15s;
+}
+.learn-btn:hover{background:var(--moss-soft)}
+.card.learned .learn-btn{background:var(--moss);color:var(--card)}
+.rel{display:flex;gap:.4rem;flex-wrap:wrap;margin-left:auto}
+.rel button{
+  all:unset;cursor:pointer;font-size:.7rem;padding:.28rem .65rem;border-radius:99px;
+  background:var(--paper-deep);color:var(--ink-soft);border:1px solid var(--line);
+}
+.rel button:hover{border-color:var(--gold);color:var(--ink)}
+
+code{
+  font-family:ui-monospace,'SF Mono',Menlo,monospace;font-size:.86em;
+  background:var(--paper-deep);padding:.1em .35em;border-radius:.3em;
+}
+
+.empty{color:var(--ink-soft);font-style:italic;padding:2rem 0;font-family:'Fraunces',Georgia,serif;font-size:1.05rem}
+
+.pager{display:flex;justify-content:space-between;margin-top:2.4rem;gap:1rem}
+.pager button{
+  all:unset;cursor:pointer;font-size:.85rem;font-weight:600;color:var(--moss);
+  padding:.6rem .9rem;border-radius:.55rem;border:1px solid var(--line);background:var(--card);
+  transition:border-color .15s;max-width:46%;
+}
+.pager button:hover{border-color:var(--moss)}
+.pager button span{display:block;font-size:.66rem;color:var(--ink-soft);font-weight:500;letter-spacing:.1em;text-transform:uppercase}
+.pager .next{text-align:right;margin-left:auto}
+
+/* mobile */
+.menu-toggle{display:none}
+@media (max-width:840px){
+  .layout{grid-template-columns:1fr}
+  aside{position:static;height:auto;border-right:none;border-bottom:1px solid var(--line);padding-bottom:1.4rem}
+  .progressbox{margin-top:.4rem}
+  main{padding:1.8rem 1.2rem 4rem}
+  .chapter-head h2{font-size:1.9rem}
+  .rel{margin-left:0}
+}
+</style>
+</head>
+<body>
+<div class="layout">
+  <aside>
+    <div class="masthead">
+      <h1>A Field Guide to <em>Machine Learning</em></h1>
+      <div class="sub">From first principles to micro-experts</div>
+    </div>
+    <hr class="rule">
+    <div class="searchwrap">
+      <input id="search" type="search" placeholder="Search the guide…" autocomplete="off">
+      <kbd>/</kbd>
+    </div>
+    <nav id="nav"></nav>
+    <div class="progressbox">
+      <div class="label"><span>Concepts collected</span><strong id="ptext">0 / 0</strong></div>
+      <div class="trail"><i id="pbar" style="width:0%"></i></div>
+      <button class="reset" id="reset">Reset progress</button>
+    </div>
+  </aside>
+  <main id="main"></main>
+</div>
+
+<script>
+const GUIDE = [
+{
+  numeral:'I', slug:'foundations', title:'Foundations',
+  desc:'What machine learning actually is, stripped of the mystique. Nine ideas that everything else in this guide is built on.',
+  topics:[
+  {id:'ml', term:'Machine learning',
+   plain:'Programming by example instead of by rules.',
+   gist:'In normal programming you write the rules and the computer applies them. In machine learning you show the computer lots of examples — inputs paired with the answers you want — and it works out the rules itself. The "rules" it finds are stored as millions (or billions) of numbers.',
+   why:'Fine-tuning a micro-expert is exactly this: you curate examples of the behavior you want (say, perfect GraphQL), and the model absorbs the pattern.',
+   deeper:'<p>There are three classic flavors. <b>Supervised learning</b>: learn from labeled examples (spam / not spam). <b>Unsupervised learning</b>: find structure in unlabeled data (group similar customers). <b>Reinforcement learning</b>: learn by trial and error with rewards (game-playing agents).</p><p>Modern LLMs use all three at different stages: pretraining is (self-)supervised, and the final polish often uses reinforcement learning. When you fine-tune later, you will be doing supervised learning on a small, curated dataset.</p>',
+   rel:['model','training']},
+  {id:'model', term:'Model',
+   plain:'The learned artifact — a big bundle of numbers that maps input to output.',
+   gist:'A model is what training produces: a fixed mathematical function, defined by its parameters, that turns an input (an image, a sentence) into an output (a label, the next word). It is literally a file on disk. "Llama 3 8B" is one specific file of ~8 billion numbers.',
+   why:'Your micro-experts will be small model files (or small patches to model files) that you can copy, version, and run on your own machine.',
+   deeper:'<p>Two things define a model: its <b>architecture</b> (the shape of the math — how the numbers are wired together) and its <b>weights</b> (the actual values of those numbers, learned during training). Same architecture + different weights = different behavior. That is why a fine-tune of Llama is still "a Llama" — you kept the architecture and nudged the weights.</p>',
+   rel:['params','transformer']},
+  {id:'params', term:'Parameters (weights)',
+   plain:'The individual numbers inside a model. "7B" means seven billion of them.',
+   gist:'Each parameter is one adjustable dial. Training is the process of turning billions of dials until the model’s outputs match the examples. Model names like 3B, 7B, 70B tell you how many dials there are — a rough proxy for capability, memory footprint, and cost.',
+   why:'Parameter count decides what fits on your Mac. A 7B model is very trainable locally; a 70B mostly is not. Micro-experts live happily in the 1B–8B range.',
+   deeper:'<p>Each parameter is typically stored as a 16-bit number during training, so a 7B model is ~14 GB of raw weights. Quantization (chapter V) shrinks this dramatically for inference.</p><p>More parameters means more capacity to store patterns — but for a <em>narrow</em> task, a small model with the right training data often beats a giant generalist. That asymmetry is the entire premise of micro-experts.</p>',
+   rel:['model','quantization','model-size']},
+  {id:'training', term:'Training vs. inference',
+   plain:'Training changes the numbers; inference just uses them.',
+   gist:'Training is the expensive learning phase: show examples, measure error, adjust parameters, repeat millions of times. Inference is the cheap using phase: freeze the numbers and run inputs through. When you chat with a model, that’s inference. When you fine-tune, you are briefly back in training.',
+   why:'Fine-tuning on your Mac means doing a small amount of training on top of someone else’s enormous training run. You get 99.9% of the work for free.',
+   deeper:'<p>Training needs far more memory and compute than inference because it must remember intermediate results (activations) and gradients for every parameter. Rule of thumb: full training takes ~4× the memory of inference for the same model. This is why techniques like LoRA (chapter IV) matter — they shrink the trainable surface so consumer hardware can cope.</p>',
+   rel:['loss','lora']},
+  {id:'loss', term:'Loss function',
+   plain:'A single number scoring how wrong the model currently is.',
+   gist:'After the model makes a prediction, the loss function compares it to the correct answer and produces one number: big means very wrong, near zero means nearly right. All of training is just an algorithm trying to push this number down.',
+   why:'When you fine-tune, you’ll literally watch a loss curve go down. Reading that curve — is it still falling? has it flattened? did it spike? — is the main instrument on your dashboard.',
+   deeper:'<p>For language models the standard loss is <b>cross-entropy</b>: how surprised was the model by the true next token? Low surprise = low loss.</p><p>A falling <em>training</em> loss with a rising <em>validation</em> loss is the classic signature of overfitting — the model is memorizing your examples instead of learning the pattern. You will meet this exact situation when fine-tuning on small datasets.</p>',
+   rel:['gradient','overfitting']},
+  {id:'gradient', term:'Gradient descent',
+   plain:'Nudge every dial slightly in the direction that reduces the error. Repeat.',
+   gist:'For each parameter, calculus can tell you: "if you increase this dial a little, does the loss go up or down?" Gradient descent nudges every dial a tiny step in the helpful direction, then re-measures. Billions of tiny nudges later, you have a trained model.',
+   why:'The "learning rate" hyperparameter you’ll set when fine-tuning is exactly the size of these nudges. Too big and training explodes; too small and nothing happens.',
+   deeper:'<p><b>Backpropagation</b> is the bookkeeping algorithm that computes all those "which way to nudge" signals efficiently in one backward sweep through the network. In practice everyone uses refined variants like <b>AdamW</b>, which adapts the step size per-parameter — it will be the default optimizer in any fine-tuning tool you touch.</p>',
+   rel:['loss','hyperparams']},
+  {id:'splits', term:'Train / validation / test splits',
+   plain:'Never grade a model on questions it studied. Hold some data back.',
+   gist:'You split your data: the training set teaches the model, the validation set checks progress during training on unseen examples, and the test set gives a final honest grade at the very end. Skipping this is how people fool themselves into shipping models that only work on their own examples.',
+   why:'When you build a GraphQL micro-expert, holding out 10–20% of your examples is the only way to know it learned GraphQL rather than memorizing your files.',
+   deeper:'<p>A subtle trap is <b>leakage</b>: near-duplicates of training examples sneaking into the test set, inflating your score. With small fine-tuning datasets (hundreds of examples), dedupe before splitting.</p><p>For micro-experts, an even better test set is a hand-written list of tasks-you-actually-care-about — that becomes your eval (chapter III and VI).</p>',
+   rel:['overfitting','evals']},
+  {id:'overfitting', term:'Overfitting & underfitting',
+   plain:'Memorizing the textbook vs. never opening it. You want the middle: generalizing.',
+   gist:'An overfit model aces its training examples but fails on anything new — it memorized instead of learning. An underfit model hasn’t even captured the training data’s pattern. The sweet spot, generalization, means performing well on data it has never seen.',
+   why:'This is the number-one failure mode of small fine-tunes. Train too long on 300 examples and the model will parrot them verbatim while getting worse at everything else.',
+   deeper:'<p>Defenses you will actually use: <b>more/varied data</b> (best), <b>fewer epochs</b> (stop training earlier), <b>early stopping</b> (halt when validation loss stops improving), and <b>regularization</b> (small penalties that discourage extreme weights). With LoRA, using a smaller rank also limits how much the model can memorize.</p>',
+   rel:['splits','forgetting']},
+  {id:'embeddings', term:'Embeddings',
+   plain:'Meaning turned into coordinates — similar things end up near each other.',
+   gist:'An embedding represents a word, sentence, or document as a list of numbers (a vector), positioned so that similar meanings land close together. "King" sits near "queen"; an error log sits near similar error logs. This lets computers do math on meaning: search by similarity instead of by keyword.',
+   why:'Embeddings power RAG (chapter III) — often the right tool when you thought you needed fine-tuning. Knowing which to reach for saves you weeks.',
+   deeper:'<p>Dedicated embedding models turn text into vectors of a few hundred to a few thousand dimensions. You store them in a <b>vector database</b> and query with cosine similarity ("find the 5 chunks nearest this question").</p><p>Inside an LLM, every token is also an embedding — the first layer converts token IDs into vectors, and everything after that is vector math.</p>',
+   rel:['rag','token']},
+]},
+{
+  numeral:'II', slug:'llms', title:'How LLMs Work',
+  desc:'The specific machine behind the current AI moment. After this chapter, phrases like "context window" and "temperature" stop being magic words.',
+  topics:[
+  {id:'token', term:'Token',
+   plain:'The chunk of text a model actually reads — roughly ¾ of a word.',
+   gist:'Models don’t see letters or words; they see tokens — common fragments like "the", "ing", or "GraphQL" might each be one token, while rare words get split into pieces. Everything is measured in tokens: context limits, API pricing, generation speed.',
+   why:'Your fine-tuning datasets are measured in tokens, and local inference speed is reported in tokens/second. It’s the unit of currency for everything you’ll do.',
+   deeper:'<p>The tokenizer is a fixed lookup built before training (usually via <b>byte-pair encoding</b> — repeatedly merging the most frequent character pairs). English averages ~4 characters per token; code and non-English text often cost more tokens per character.</p><p>Tokenization explains classic quirks: models historically struggled to count letters in "strawberry" because they never saw letters — just token chunks.</p>',
+   rel:['context','nexttoken']},
+  {id:'nexttoken', term:'Next-token prediction',
+   plain:'The whole game: repeatedly guess the next chunk of text.',
+   gist:'An LLM does exactly one thing: given all the text so far, output a probability for every possible next token. Pick one, append it, repeat. Every essay, answer, and program a model has ever produced was generated one token at a time this way.',
+   why:'Fine-tuning simply reshapes these probabilities. A GraphQL micro-expert is a model whose "most likely next token" is reliably the correct GraphQL one.',
+   deeper:'<p>The surprise of the last few years is how much capability falls out of this simple objective at scale. To get good at predicting the next token of, say, a chess commentary or a Python traceback, the model is forced to internally learn chess and Python. Prediction pressure creates understanding-like behavior.</p>',
+   rel:['token','sampling','pretraining']},
+  {id:'transformer', term:'Transformer',
+   plain:'The neural network architecture behind essentially every modern AI model.',
+   gist:'Introduced in 2017 ("Attention Is All You Need"), the transformer processes all tokens in parallel rather than one-by-one, which made training on internet-scale data practical. GPT, Claude, Llama, Gemini — all transformers.',
+   why:'Every model you’ll fine-tune locally is a transformer, and tooling terms (layers, attention heads, hidden size) all refer to its parts.',
+   deeper:'<p>A transformer is a stack of identical <b>blocks</b> (a 7B model might have 32). Each block does two things: <b>attention</b> (tokens exchange information with each other) then an <b>MLP / feed-forward layer</b> (each token is processed individually — roughly where "knowledge" is stored). Stack enough blocks and each token’s representation becomes extraordinarily context-aware.</p><p>When you configure LoRA later, you’ll choose which of these internal matrices to adapt — usually the attention projections.</p>',
+   rel:['attention','model']},
+  {id:'attention', term:'Attention',
+   plain:'The mechanism letting every word look at every other word and decide what’s relevant.',
+   gist:'For each token, attention asks: "which earlier tokens matter for understanding me?" In "the bank of the river", attention lets "bank" weigh "river" heavily and resolve its meaning. Each layer has many parallel attention "heads", each learning different relationships — grammar, references, long-range structure.',
+   why:'Attention is why context windows are finite and why long contexts get slow — its cost grows with how many token-pairs must interact.',
+   deeper:'<p>Mechanically, each token emits a <b>query</b> ("what am I looking for?"), a <b>key</b> ("what do I contain?") and a <b>value</b> ("what do I pass along?"). Matching queries against keys produces attention weights; values are blended accordingly. Naively this is O(n²) in sequence length — the root cause of context limits and the reason the KV cache (chapter V) exists.</p>',
+   rel:['transformer','context','kvcache']},
+  {id:'context', term:'Context window',
+   plain:'The model’s working memory — everything it can "see" right now, in tokens.',
+   gist:'The context window is the maximum number of tokens a model can consider at once: your instructions, the conversation so far, any pasted documents, plus its own output. Nothing outside the window exists for the model. Models don’t remember between sessions — each conversation is the entire universe.',
+   why:'Local models often run with modest contexts (8k–32k) because longer ones eat memory fast. Micro-experts sidestep this: a specialist needs less context because the knowledge is baked into its weights.',
+   deeper:'<p>"Losing the thread" in long chats is usually context overflow — early messages fall (or get summarized) out of the window. Even within the window, models attend more reliably to the beginning and end than the middle ("lost in the middle").</p><p>Memory cost for context grows linearly (via the KV cache) and compute grows faster, which is why doubling context on local hardware hurts more than you expect.</p>',
+   rel:['attention','kvcache','token']},
+  {id:'pretraining', term:'Pretraining & base models',
+   plain:'The trillion-token general education, before any manners are taught.',
+   gist:'Pretraining runs next-token prediction over a huge slice of the internet, books, and code for months on thousands of GPUs. The result is a base model: a raw text-completer full of knowledge but with no instinct to be helpful — ask it a question and it may just continue with more questions. Chat behavior comes later, from fine-tuning.',
+   why:'You’ll usually build on an instruct model (already taught to follow instructions), not a raw base — but knowing the difference explains model names like "Llama-3-8B" vs "Llama-3-8B-Instruct".',
+   deeper:'<p>The pipeline: <b>pretraining</b> (predict the internet — 99% of the cost) → <b>supervised fine-tuning</b> (learn to follow instructions from example dialogues) → <b>preference tuning</b> (RLHF/DPO — learn which responses humans prefer). Chapter IV covers the last two, because they’re the same techniques you’ll use in miniature.</p>',
+   rel:['sft','preference','nexttoken']},
+  {id:'sampling', term:'Temperature & sampling',
+   plain:'The dial between predictable and creative when picking each next token.',
+   gist:'The model outputs probabilities; sampling decides how to pick. Temperature 0 ≈ always take the most likely token (deterministic, focused). Higher temperatures give lower-probability tokens a real chance (varied, creative, riskier). This is why the same prompt gives different answers on different runs.',
+   why:'For code-generating micro-experts you’ll usually run low temperature — you want the single most-likely correct token, not creative variety.',
+   deeper:'<p>Other knobs you’ll see in Ollama and friends: <b>top-p</b> (sample only from the smallest set of tokens covering p% of probability), <b>top-k</b> (only the k most likely), and <b>repetition penalties</b>. A common recipe for code: temperature 0–0.3, top-p 0.9. For brainstorming: temperature 0.8–1.0.</p>',
+   rel:['nexttoken','hallucination']},
+  {id:'hallucination', term:'Hallucination',
+   plain:'Confidently stated fiction — a side effect of always predicting something.',
+   gist:'A language model must always produce a next token, and it has no built-in sense of "I don’t know". When the true answer wasn’t well represented in training, it produces something plausible-shaped instead: a fake citation, an invented API method. It isn’t lying; it’s pattern-completing without a fact-checker.',
+   why:'A micro-expert trained on your actual schema hallucinates less within its niche than a generalist guessing at it — one of the strongest arguments for specialization.',
+   deeper:'<p>Mitigations, in rough order of effectiveness: <b>ground the model</b> with RAG (put the true facts in context), <b>constrain output</b> (schemas, tool calls, "answer only from the provided text"), <b>lower temperature</b>, and <b>verify externally</b> (run the generated code, check the citation). For micro-experts: an eval that catches invented fields in generated GraphQL is worth more than any prompt-level plea to "be accurate".</p>',
+   rel:['rag','evals','sampling']},
+  {id:'scaling', term:'Scaling laws & emergence',
+   plain:'Bigger model + more data + more compute = predictably better, with surprises.',
+   gist:'Loss improves smoothly and predictably as you scale parameters, data, and compute — that reliability is why labs bet billions on bigger runs. But specific abilities (arithmetic, translation, code) can appear rather abruptly as scale grows, which is loosely called emergence.',
+   why:'The flip side matters more to you: for a narrow task, scale is substitutable — a small model plus your targeted data can match a giant model at that one thing, at 1% of the cost.',
+   deeper:'<p>The <b>Chinchilla</b> finding (2022): most big models had too many parameters for too little data; compute is better spent on more tokens. Since then, small models trained on enormous data (Llama-class 8B models see 15T+ tokens) have become shockingly capable — which is precisely why the micro-expert strategy works now and didn’t work in 2021.</p>',
+   rel:['params','microexperts-why']},
+]},
+{
+  numeral:'III', slug:'using', title:'Using Models Well',
+  desc:'Getting the most out of a model without changing a single weight. Master these first — half the time you thought you needed fine-tuning, one of these is the answer.',
+  topics:[
+  {id:'prompting', term:'Prompt engineering',
+   plain:'Writing inputs that reliably produce the outputs you want.',
+   gist:'Models are wildly sensitive to how you ask. The reliable levers: be specific about the task, show the desired format, give relevant context, say what to avoid, and for complex tasks break the work into steps. Less mysticism than the name suggests — mostly clear technical writing.',
+   why:'Prompting is your baseline. Before fine-tuning anything, you should know what the best prompt achieves — the fine-tune has to beat it to be worth the effort.',
+   deeper:'<p>Techniques that consistently pay off: put instructions <b>before</b> the data they apply to; use delimiters (XML tags, fences) to separate sections; ask for output in a fixed structure; and give the model an "out" ("if the answer isn’t in the text, say so"). Iterate empirically — small wording changes measurably move outcomes, so keep a scratch file of prompt versions and what changed.</p>',
+   rel:['system','fewshot','structured']},
+  {id:'system', term:'System prompt',
+   plain:'Standing instructions that shape the whole conversation.',
+   gist:'Most chat APIs accept a special system message — instructions, persona, rules, and context that apply to every turn. "You are a senior GraphQL engineer. Only output valid SDL. Never invent fields." User messages come and go; the system prompt is the constitution.',
+   why:'A great system prompt is the cheapest micro-expert. Build one per specialty and you have a prototype to measure a real fine-tune against.',
+   deeper:'<p>System prompts are also how products differentiate on the same base model — much of an AI assistant’s "personality" is a long, carefully-tested system prompt. In Ollama, a <code>Modelfile</code> lets you bake a system prompt into a named local model: <code>graphql-helper</code> can be Llama plus your rules, creatable in thirty seconds.</p>',
+   rel:['prompting','ollama']},
+  {id:'fewshot', term:'Few-shot examples',
+   plain:'Show, don’t tell: put 2–5 worked examples in the prompt.',
+   gist:'Including examples of input → desired output in your prompt often outperforms paragraphs of instruction. The model pattern-matches your examples: their format, tone, level of detail, and edge-case handling. Zero-shot = no examples; few-shot = a handful.',
+   why:'Few-shot is fine-tuning’s little sibling — same idea (learn from examples), but in-context and temporary. If few-shot works well, a fine-tune on hundreds of such examples usually works brilliantly and frees up your context.',
+   deeper:'<p>What matters: examples should be <b>representative</b> (cover the variation you expect), <b>correct</b> (models copy mistakes faithfully), and <b>consistently formatted</b> (deviations confuse the pattern). The cost is context: five worked examples might be 2,000 tokens on every single call. Fine-tuning moves those examples into the weights permanently.</p>',
+   rel:['prompting','sft']},
+  {id:'cot', term:'Reasoning & chain of thought',
+   plain:'Letting the model think out loud before answering makes it smarter.',
+   gist:'Asking a model to work step-by-step before giving the final answer substantially improves math, logic, and multi-step tasks. Each generated token is a bit of computation — writing out reasoning literally gives the model more compute to spend on your problem. Modern "reasoning models" bake this in, thinking privately before responding.',
+   why:'Small local models benefit hugely from explicit step-by-step prompting — it partially compensates for their size. Try it before assuming a small model can’t handle a task.',
+   deeper:'<p>The 2024–25 wave of reasoning models (o-series, DeepSeek-R1, Claude’s extended thinking) train this behavior with reinforcement learning, rewarding chains of thought that reach correct answers. Distilled reasoning traces from big models are now used to teach small models to reason — a technique directly relevant to building capable micro-experts.</p>',
+   rel:['distillation','prompting']},
+  {id:'rag', term:'RAG (retrieval-augmented generation)',
+   plain:'Look it up first, then answer — search results pasted into the prompt.',
+   gist:'RAG bolts a search step onto generation: embed your documents, store them in a vector database, and at question-time retrieve the most relevant chunks and place them in the context window. The model answers from provided text instead of hazy memorized knowledge. This is how "chat with your docs" products work.',
+   why:'The classic decision: RAG for knowledge (facts, docs, things that change), fine-tuning for behavior (format, style, skill). A GraphQL micro-expert might use both — fine-tuned on the skill, RAG for your current schema.',
+   deeper:'<p>Pipeline: <b>chunk</b> documents (few hundred tokens each, respecting structure) → <b>embed</b> chunks → <b>store</b> vectors → at query time <b>retrieve</b> top-k similar chunks (often re-ranked) → <b>generate</b> with chunks in context. Most RAG failures are retrieval failures — the right chunk never reached the model — so debug the search before blaming the LLM.</p>',
+   rel:['embeddings','finetune-when','hallucination']},
+  {id:'structured', term:'Structured output',
+   plain:'Forcing responses into exact JSON or a schema, so code can consume them.',
+   gist:'Free-form prose is useless to a program. Structured output makes the model emit valid JSON matching a schema you define — either by strong prompting or, better, by constrained decoding where the runtime only allows tokens that keep the output valid.',
+   why:'Micro-experts usually live inside pipelines, so their outputs must be machine-readable. Local runtimes (Ollama, llama.cpp) support enforced JSON schemas and grammars.',
+   deeper:'<p><b>Constrained decoding</b> is the elegant trick: at each step, mask out every token that would violate the grammar or schema, so invalid output is impossible rather than unlikely. llama.cpp’s GBNF grammars can even constrain output to a specific DSL — imagine constraining generation to syntactically valid GraphQL while your fine-tune supplies the semantics.</p>',
+   rel:['tools','ollama']},
+  {id:'tools', term:'Tool calling',
+   plain:'The model can’t browse or compute — so it asks your code to do it.',
+   gist:'You describe available functions ("search_web(query)", "run_sql(query)"); when the model needs one, it outputs a structured call instead of prose. Your code executes it and feeds the result back, and the model continues. This is the bridge between "text predictor" and "system that does things".',
+   why:'A micro-expert wrapped with tools becomes genuinely useful: your GraphQL specialist could call "validate_against_schema" and self-correct before ever showing you output.',
+   deeper:'<p>The loop: model emits tool call → your code runs it → result appended to conversation → model continues (possibly calling more tools) → final answer. The model never executes anything itself; it only requests. <b>MCP</b> (Model Context Protocol) is the emerging standard for packaging tool servers so any model or app can use them. Tool-calling quality varies a lot between small models — worth checking before choosing a base.</p>',
+   rel:['agents','structured']},
+  {id:'agents', term:'Agents',
+   plain:'A model in a loop: plan, act via tools, observe, repeat until done.',
+   gist:'An agent is an LLM given a goal rather than a single question. It decides on actions, executes them through tools, reads the results, and keeps going — handling multi-step tasks like "find the bug, fix it, run the tests". The tool you’re reading this in (Claude Code) is an agent.',
+   why:'The end-game for your micro-experts is agentic: a small router agent that delegates GraphQL work to your GraphQL specialist, SQL to your SQL specialist — a team of cheap local experts.',
+   deeper:'<p>What separates toy agents from useful ones: <b>feedback loops</b> (run the tests, see the failure, adjust — verification beats brilliance), <b>context management</b> (long tasks overflow the window; good agents summarize and take notes), and <b>knowing when to stop</b> (escalate to a human rather than thrash). Errors compound across steps, so per-step reliability matters more in agents than anywhere else — a strong argument for specialists over generalists in the loop.</p>',
+   rel:['tools','routing']},
+  {id:'evals', term:'Evals',
+   plain:'Automated tests for model behavior — the unit tests of AI work.',
+   gist:'An eval is a set of test cases (input + how to judge the output) that you run against a model to get a score. Public benchmarks (MMLU, HumanEval) rank models broadly, but the evals that matter are yours: does it handle your tasks correctly? Without evals, every model change is vibes.',
+   why:'This is the single highest-leverage habit for your goal. You cannot fine-tune well without an eval — you’d have no way to know whether version 2 of your micro-expert is better or worse than version 1.',
+   deeper:'<p>Three grading styles: <b>exact/programmatic</b> (does the JSON parse? does the code compile? do the tests pass?) — perfect for code-generating experts; <b>LLM-as-judge</b> (a strong model grades subjective quality against a rubric); <b>human review</b> (gold standard, expensive, use sparingly).</p><p>Start embarrassingly small: 20 real tasks in a file, a script that runs them, a score at the end. Grow it every time you find a failure. Chapter VI builds on this heavily.</p>',
+   rel:['splits','task-evals']},
+]},
+{
+  numeral:'IV', slug:'finetuning', title:'Fine-Tuning',
+  desc:'Reshaping a model’s behavior with your own data. The chapter where you go from consumer to maker.',
+  topics:[
+  {id:'finetune-when', term:'When to fine-tune (vs. prompt vs. RAG)',
+   plain:'Fine-tune for behavior and style; RAG for facts; prompts for everything you can.',
+   gist:'The decision rule: if you need the model to know things (your docs, current data) → RAG. If you need it to behave differently (output format, style, a skill practiced thousands of times, working without a huge prompt) → fine-tune. If a prompt gets you there → stop, you’re done. Fine-tuning shines when prompts grew huge, few-shot isn’t reliable enough, or you want a small model to punch above its weight.',
+   why:'This is the strategic heart of the whole guide: micro-experts exist precisely where fine-tuning wins — narrow, high-volume, well-defined skills.',
+   deeper:'<p>Fine-tuning is a poor way to inject <em>knowledge</em> — facts learned from a few hundred examples are shallow and hallucination-prone, while RAG quotes the source directly. It’s a great way to install <em>skills</em>: emitting your exact code conventions, mastering a DSL, following a complex output contract without being told each time.</p><p>Honest cost accounting: fine-tuning adds dataset building, training runs, eval maintenance, and versioning. The prompt-only baseline is step one of any serious project — it’s what your fine-tune must beat.</p>',
+   rel:['rag','prompting','recipe']},
+  {id:'sft', term:'Supervised fine-tuning (SFT)',
+   plain:'Training on example conversations: here’s the input, here’s the ideal response.',
+   gist:'SFT (also called instruction tuning) continues training on curated prompt→response pairs instead of raw internet text. The model learns to imitate your ideal responses. This is how base models become chat models — and it’s exactly what you’ll do, at small scale, to create a specialist.',
+   why:'SFT on a few hundred to a few thousand quality examples is the core move for building each micro-expert. Everything else in this chapter supports it.',
+   deeper:'<p>Data format is simple — a JSONL file of chat transcripts: <code>{"messages":[{"role":"user","content":"…"},{"role":"assistant","content":"…"}]}</code>. Typically only the assistant’s tokens are scored by the loss (the model learns to <em>respond</em>, not to predict your questions).</p><p>Scale intuition: noticeable style/format shifts from ~50–100 examples; solid narrow-task competence often at 500–5,000. Quality dominates quantity at every scale.</p>',
+   rel:['data','lora','templates']},
+  {id:'fullft', term:'Full fine-tuning',
+   plain:'Update every weight in the model. Powerful, but heavy for home hardware.',
+   gist:'Full fine-tuning continues training with all parameters trainable. Maximum capacity to change behavior — and maximum memory: weights, gradients, and optimizer state for a 7B model want ~60 GB+, beyond most personal machines. Labs do this; hobbyists usually don’t need to.',
+   why:'Know it exists and what it costs — then use LoRA, which gets you most of the benefit at ~1% of the trainable parameters.',
+   deeper:'<p>Why so heavy? Per parameter you hold the weight, its gradient, and two optimizer statistics (AdamW momentum terms) — roughly 8× the raw weight memory in naive fp32 training. Tricks like gradient checkpointing and mixed precision help, but the floor stays high.</p><p>Full FT also erases skills faster (catastrophic forgetting) because everything can move. LoRA’s constraint is a feature, not just a compromise.</p>',
+   rel:['lora','forgetting','training']},
+  {id:'lora', term:'LoRA',
+   plain:'Freeze the model; train tiny add-on matrices instead. The fine-tuning workhorse.',
+   gist:'LoRA (Low-Rank Adaptation) keeps all original weights frozen and learns small low-rank "adapter" matrices alongside key layers — typically well under 1% of the model’s parameters. Quality approaches full fine-tuning for most narrow tasks, at a fraction of the memory. The output is a small adapter file (megabytes) you can share, stack, and swap.',
+   why:'This is *the* technique for your goal. Each micro-expert = one base model + one small LoRA adapter per specialty. One 8B base, many cheap experts.',
+   deeper:'<p>The trick: a weight update ΔW can be approximated as the product of two skinny matrices, A (d×r) and B (r×d), with rank r as small as 8–64. Train only A and B. At inference you can merge them into the base weights — zero added latency.</p><p>Knobs you’ll set: <b>rank r</b> (capacity — start 16 or 32), <b>alpha</b> (scaling, commonly 2×r), and <b>target modules</b> (which layers get adapters — attention projections at minimum, often the MLP too). Bigger rank ≠ better: more capacity to overfit your small dataset.</p>',
+   rel:['qlora','sft','fullft']},
+  {id:'qlora', term:'QLoRA',
+   plain:'LoRA on top of a quantized base model — fine-tune a 7B on a laptop.',
+   gist:'QLoRA loads the frozen base model in 4-bit precision (quartering its memory) and trains LoRA adapters in higher precision on top. The 2023 paper showed quality nearly matching 16-bit fine-tuning. This is the technique that makes serious fine-tuning possible on consumer hardware — including Apple Silicon Macs.',
+   why:'QLoRA is realistically how you’ll train: a 7B–8B base in 4-bit + LoRA adapters fits comfortably in 16–24 GB of unified memory.',
+   deeper:'<p>Details worth knowing: the NF4 (NormalFloat-4) data type is designed for the bell-curve distribution of neural weights; gradients flow <em>through</em> the frozen 4-bit weights into the fp16 adapters; paged optimizers spill to CPU RAM at memory spikes.</p><p>In practice you’ll reach for tools that package this: <b>MLX-LM</b> (native Apple Silicon: <code>mlx_lm.lora</code>), <b>Unsloth</b> (fast, single-GPU, beginner-friendly), or <b>Axolotl</b> (config-driven, flexible) on NVIDIA boxes or rented cloud GPUs.</p>',
+   rel:['lora','quantization','mlx']},
+  {id:'data', term:'Training data curation',
+   plain:'The dataset is the product. Model quality is a mirror of example quality.',
+   gist:'Fine-tuning transfers whatever is in your examples — brilliance, sloppiness, quirks, all of it, faithfully. A few hundred excellent, consistent, varied examples beat ten thousand mediocre ones. Budget most of your project time here, not on training runs.',
+   why:'For a GraphQL micro-expert: gather real queries/schemas from your work, write ideal responses, cover the edge cases you actually hit. This dataset is your moat — anyone can run the training script.',
+   deeper:'<p>A useful checklist: <b>correct</b> (every response is genuinely what you want — one bad example teaches a bad lesson), <b>consistent</b> (same format and conventions throughout), <b>varied</b> (different phrasings, difficulty levels, edge cases — variety fights overfitting), <b>deduplicated</b>, and <b>clean of accidents</b> (no secrets, no "As an AI…" boilerplate you don’t want parroted).</p><p>Sources: your real usage history, hand-written gold examples, and synthetic data generated by a strong model then <em>filtered</em> (chapter VI). Always eyeball a random sample before training — every experienced practitioner has a story about the garbage they almost trained on.</p>',
+   rel:['synthetic','sft','overfitting']},
+  {id:'templates', term:'Chat templates',
+   plain:'The exact token format that turns a conversation into model input. Get it wrong, get gibberish.',
+   gist:'Under the hood, a chat is serialized into one long string with special tokens marking who said what — and every model family uses a different format (Llama’s headers, ChatML’s <code>&lt;|im_start|&gt;</code>, etc.). Fine-tuning with the wrong template, or serving with a different template than you trained with, silently ruins quality.',
+   why:'This is the most common silent killer of hobbyist fine-tunes. When your fine-tuned model behaves weirdly, check the template first.',
+   deeper:'<p>Modern tooling mostly handles this — tokenizers ship with the correct template and libraries apply it. The dangerous moments are the seams: exporting from a training framework into GGUF/Ollama, or hand-building prompts. Symptoms of mismatch: the model rambles past its turn, emits stray tags like <code>&lt;|im_end|&gt;</code>, or ignores its training. Rule: train and serve with byte-identical formatting.</p>',
+   rel:['sft','gguf','token']},
+  {id:'hyperparams', term:'Hyperparameters that matter',
+   plain:'The handful of training dials worth understanding: learning rate, epochs, batch size.',
+   gist:'Hyperparameters are the settings of training itself. For fine-tuning, three carry most of the weight: learning rate (nudge size — too high destroys the model, too low does nothing), epochs (passes over your data — more passes, more overfitting risk), and batch size (examples per update — mostly a memory/stability trade-off).',
+   why:'Defaults from your tool (MLX-LM, Unsloth) are good starting points. Change one thing at a time and let your eval judge — not the loss alone.',
+   deeper:'<p>Starting points for LoRA fine-tunes: learning rate 1e-4 to 2e-4 (10–100× higher than full fine-tuning uses), 1–3 epochs for datasets of thousands, more for tiny sets — with early stopping on validation loss. <b>Gradient accumulation</b> simulates big batches on small memory by summing gradients across several small batches before stepping.</p><p>Watch the loss curve: healthy runs fall fast then flatten. A flat line from step one → learning rate too low or data problem. Spikes to NaN → too high. Validation loss rising while training loss falls → stop, you’re overfitting.</p>',
+   rel:['gradient','overfitting','loss']},
+  {id:'forgetting', term:'Catastrophic forgetting',
+   plain:'Teach it GraphQL too hard and it forgets how to write English.',
+   gist:'Neural networks learn new things by overwriting the same weights that store old things. Aggressive fine-tuning on a narrow dataset can degrade general abilities — your specialist gets brilliant at the task and clumsy at everything around it. The narrower and longer you train, the worse it gets.',
+   why:'For micro-experts this is a real but manageable trade: you’re *choosing* specialization. You just want to lose generality by design, not by accident.',
+   deeper:'<p>Practical defenses: <b>LoRA itself</b> (frozen base = bounded damage; you can always detach the adapter), <b>fewer epochs / lower LR</b>, <b>mixing in general data</b> (blend some general chat examples into your task data to anchor broad ability), and <b>eval coverage</b> (include a few general-ability checks in your eval so you notice the regression). Since adapters are swappable, the base model always survives intact underneath.</p>',
+   rel:['lora','overfitting','data']},
+  {id:'preference', term:'Preference tuning (RLHF & DPO)',
+   plain:'Beyond imitation: teach from "this response is better than that one".',
+   gist:'After SFT teaches imitation, preference tuning teaches taste. Collect pairs — same prompt, a preferred response and a rejected one — and train the model toward the winners. RLHF does this with a reward model and reinforcement learning; DPO gets similar results with a much simpler direct training step, making it practical for individuals.',
+   why:'Advanced move for later: when your micro-expert is decent but makes characteristic mistakes, DPO on "correct vs. typical-mistake" pairs polishes exactly that behavior.',
+   deeper:'<p>RLHF (used to align major assistants) trains a separate reward model on human preferences, then optimizes the LLM against it with PPO — powerful, finicky, infrastructure-heavy. <b>DPO</b> (2023) reframed alignment as a simple loss over preference pairs: no reward model, no RL loop, works in the same tooling as SFT. Your failed eval cases are a natural source of preference pairs: model’s wrong answer = rejected, your correction = chosen.</p>',
+   rel:['sft','evals','iterate']},
+]},
+{
+  numeral:'V', slug:'local', title:'Running Models Locally',
+  desc:'Owning the stack: open-weight models on your own machine. Private, free per-token, and the substrate your micro-experts will live on.',
+  topics:[
+  {id:'openweights', term:'Open-weight models',
+   plain:'Models whose weight files you can download, run, modify, and fine-tune.',
+   gist:'Open-weight models (Llama, Qwen, Mistral, Gemma, DeepSeek, Phi…) publish their parameters for anyone to download — as opposed to closed models reachable only through an API. You can run them offline, fine-tune them, and ship products on them (license terms vary). Quality now trails the frontier by little for everyday tasks.',
+   why:'Your micro-experts will all be built on open-weight bases. The ecosystem hub is Hugging Face — think GitHub for models and datasets.',
+   deeper:'<p>"Open weight" ≠ "open source": most releases share weights but not training data or full recipes, and licenses differ (Apache-2.0 is unrestricted; Llama’s community license has conditions). Families to know in 2026: <b>Llama</b> (Meta, huge ecosystem), <b>Qwen</b> (Alibaba, excellent small models and coders), <b>Gemma</b> (Google), <b>Mistral</b> (efficient European models), <b>DeepSeek</b> (strong reasoning), <b>Phi</b> (Microsoft, small and surprisingly capable).</p>',
+   rel:['choosing','model-size']},
+  {id:'model-size', term:'Model sizes & what they can do',
+   plain:'1B–4B: quick drafts and narrow tasks. 7–14B: the local sweet spot. 70B+: needs serious hardware.',
+   gist:'Rough capability tiers: 1–4B models handle simple, well-scoped tasks (and fine-tune beautifully into specialists); 7–14B models are genuinely useful general assistants and strong fine-tuning bases; 30–70B+ approach frontier quality but demand high-end hardware. The trend that matters: each tier keeps absorbing the abilities of the tier above.',
+   why:'Micro-experts flip the usual "bigger is better" instinct: a fine-tuned 3B specialist can beat a general 70B at one narrow job — while running 20× faster.',
+   deeper:'<p>Also on the menu: <b>MoE (mixture-of-experts)</b> models activate only a fraction of their parameters per token (e.g. ~13B active out of ~100B+ total) — big-model quality, small-model speed, but the full parameter set must still fit in memory.</p><p>Distillation pressure is constant: labs compress their giants into small dense models, so today’s 8B rivals 2024’s 70B. Re-evaluate your base model choice every few months.</p>',
+   rel:['params','memory-math','choosing']},
+  {id:'quantization', term:'Quantization',
+   plain:'Storing weights with fewer bits — half or a quarter of the memory, tiny quality loss.',
+   gist:'Weights are trained as 16-bit numbers, but inference works fine with 8-bit or 4-bit approximations. A 7B model shrinks from ~14 GB to ~4 GB at 4-bit, with quality loss most people never notice. Quantization is the reason capable models run on laptops and phones at all.',
+   why:'You’ll run quantized models daily and train via QLoRA on quantized bases. Understanding the size/quality trade lets you fit the best possible model into your RAM.',
+   deeper:'<p>You’ll see names like <code>Q4_K_M</code> on GGUF files: 4-bit, "K-quant" scheme, medium variant. Rules of thumb: <b>Q8</b> ≈ indistinguishable from full precision; <b>Q4_K_M</b> is the popular sweet spot; below Q4, degradation gets noticeable — and a bigger model at Q4 usually beats a smaller one at Q8 for the same memory.</p><p>Small models degrade more from aggressive quantization than large ones — for a 3B micro-expert, prefer Q8 or 6-bit if memory allows.</p>',
+   rel:['params','gguf','memory-math']},
+  {id:'gguf', term:'GGUF & llama.cpp',
+   plain:'The file format and C++ engine that made local LLMs a thing.',
+   gist:'llama.cpp is the open-source inference engine that runs transformer models efficiently on ordinary hardware — CPUs, gaming GPUs, and Apple Silicon. GGUF is its single-file model format: weights (usually quantized), tokenizer, and metadata all in one portable file. Most of the local-AI ecosystem, including Ollama, is built on it.',
+   why:'Your pipeline will end with a GGUF: fine-tune with MLX or Unsloth → convert/merge to GGUF → serve with Ollama. Recognizing the format names removes half the confusion on Hugging Face.',
+   deeper:'<p>On a model’s Hugging Face page you’ll find dozens of GGUF files — same model, different quantization levels; you download exactly one. Conversion from training formats (safetensors) is a standard llama.cpp script, and LoRA adapters can be merged into the base before conversion.</p><p>Alternatives you’ll hear about: <b>MLX</b> (Apple’s format/framework — chapter card below) and <b>vLLM</b> (server-grade engine for GPU deployments).</p>',
+   rel:['quantization','ollama','mlx']},
+  {id:'ollama', term:'Ollama & LM Studio',
+   plain:'The easy buttons: install, `ollama run llama3`, done.',
+   gist:'Ollama wraps llama.cpp into a one-command experience: it downloads models, manages them, and serves an OpenAI-compatible local API that any app or script can call. LM Studio offers similar power with a GUI for browsing and chatting. Either turns your Mac into a private model server in minutes.',
+   why:'This is step one of your journey, today: install Ollama, pull an 8B model, talk to it. Later, your own fine-tuned micro-experts get imported here and served the same way.',
+   deeper:'<p>The <b>Modelfile</b> is Ollama’s Dockerfile-for-models: <code>FROM llama3.1:8b</code> plus a <code>SYSTEM</code> prompt and parameters creates a named custom model (<code>ollama create graphql-helper -f Modelfile</code>) — your first "expert" before any training. It also imports arbitrary GGUF files, which is how your real fine-tunes arrive.</p><p>The local API at <code>localhost:11434</code> speaks the OpenAI chat format, so nearly every AI library and editor plugin can point at it.</p>',
+   rel:['gguf','system','serving']},
+  {id:'mlx', term:'Apple Silicon & MLX',
+   plain:'Your Mac’s unified memory is a genuine ML superpower — MLX is built to use it.',
+   gist:'Apple Silicon shares one pool of fast memory between CPU and GPU, so a Mac with 32–128 GB can hold models that would need multiple expensive GPUs elsewhere. MLX is Apple’s ML framework built for this, and MLX-LM makes both running and LoRA-fine-tuning models on a Mac remarkably simple.',
+   why:'You’re on macOS: MLX-LM is likely your actual training tool. <code>mlx_lm.lora --model … --data …</code> is a real, complete fine-tuning command.',
+   deeper:'<p>The workflow: install <code>mlx-lm</code> via pip; run models from the mlx-community Hugging Face org; fine-tune with <code>mlx_lm.lora</code> on a JSONL chat dataset; test with <code>mlx_lm.generate --adapter-path …</code>; then <code>mlx_lm.fuse</code> merges the adapter for export to GGUF/Ollama.</p><p>Expectation-setting: an M-series Mac fine-tunes a 7B QLoRA over a few hundred examples in tens of minutes to a few hours — slower than an NVIDIA rig, entirely workable for micro-expert iteration. For big runs, rent cloud GPUs and bring the adapter home.</p>',
+   rel:['qlora','gguf','memory-math']},
+  {id:'memory-math', term:'The memory math',
+   plain:'Weights + context cache + overhead must fit in RAM. Learn the napkin formula.',
+   gist:'Will it run? Estimate: model memory ≈ parameters × bytes-per-weight. A 8B model at 4-bit ≈ 4–5 GB; at 8-bit ≈ 8–9 GB; at 16-bit ≈ 16 GB. Add a few GB for the KV cache (grows with context length) and runtime overhead, and leave room for your OS. That’s the whole calculation people pay consultants for.',
+   why:'This tells you instantly which micro-expert bases fit your Mac — and whether you can keep two or three experts loaded simultaneously for a routing setup.',
+   deeper:'<p>Worked example on a 32 GB Mac: Qwen-14B at Q4 ≈ 8.5 GB weights + ~2 GB cache at 8k context + overhead → comfortable. A 70B at Q4 ≈ 40 GB → does not fit. Three 3B experts at Q8 (~3.5 GB each) → all resident at once, instant switching.</p><p>Tokens/second falls roughly linearly with model size on the same hardware — another reason small specialists feel so much better in interactive use.</p>',
+   rel:['quantization','kvcache','model-size']},
+  {id:'kvcache', term:'KV cache',
+   plain:'Why long chats eat RAM and why the first token takes longest.',
+   gist:'To avoid recomputing attention over the whole conversation for every new token, the runtime caches each token’s attention keys and values. The cache makes generation fast — and grows linearly with context, which is where your memory goes in long sessions. The pause before the first token is the model reading (and caching) your whole prompt.',
+   why:'Explains real local-model behavior: why 32k context costs gigabytes, and why a specialist that needs only short prompts (skill in the weights, not the prompt) is cheaper to run.',
+   deeper:'<p>Two phases of inference: <b>prefill</b> (process the whole prompt in parallel — compute-hungry, causes first-token latency) and <b>decode</b> (one token at a time — memory-bandwidth-bound, this is your tokens/sec). Long system prompts tax every request; a fine-tuned expert with the instructions baked in skips that tax. Runtimes cap context (<code>num_ctx</code> in Ollama) mainly to bound this cache.</p>',
+   rel:['attention','context','memory-math']},
+  {id:'choosing', term:'Choosing a base model',
+   plain:'Pick the smallest model that’s good at your task family, with the right license.',
+   gist:'For a fine-tuning base: pick a size your hardware trains comfortably (3B–8B to start), from a family strong in your domain (e.g. Qwen-Coder lineage for code tasks), instruction-tuned, recently released, with a license that fits your use. Then verify with your own eval — leaderboard rank is a hint, not an answer.',
+   why:'The base model is the raw material of every micro-expert. A coder-family 3B base will out-learn a generalist 7B on GraphQL — better results and faster training.',
+   deeper:'<p>Checklist: (1) <b>size</b> — can you train it and will inference be fast enough? (2) <b>domain pedigree</b> — code-specialized bases for code experts; (3) <b>benchmarks in your area</b> — treat with suspicion, contamination is rampant; (4) <b>ecosystem</b> — GGUF/MLX availability, community fine-tunes as proof of trainability; (5) <b>license</b>; (6) finally, run your 20-case eval on 2–3 candidates and let the numbers pick. The best base for <em>your</em> task is an empirical question, and you now own the instrument that answers it.</p>',
+   rel:['openweights','evals','recipe']},
+]},
+{
+  numeral:'VI', slug:'microexperts', title:'Building Micro-Experts',
+  desc:'The capstone: small local models fine-tuned to mastery of one narrow craft — your GraphQL writer, your framework specialist. Everything so far converges here.',
+  topics:[
+  {id:'microexperts-why', term:'Why micro-experts work',
+   plain:'A 3B model can’t know everything — but it can know one thing extremely well.',
+   gist:'General ability scales with size, but narrow-task ability is different: a small model fine-tuned on a well-defined skill can match or beat giant generalists at that one skill, while being 20–100× cheaper and faster, fully private, and runnable offline. You trade breadth (which you don’t need) for depth (which you do).',
+   why:'This card is your thesis statement. Everything below is the how.',
+   deeper:'<p>Why the trade works: a narrow task has a small "behavior space" — GraphQL generation needs mastery of one grammar, your conventions, and common patterns, not world knowledge. A few thousand focused examples can cover it densely, while a generalist spreads its capacity across everything.</p><p>The economics compound: near-zero marginal cost per call, no rate limits, no data leaving your machine, latency low enough for editor integration. And expertise becomes an artifact — a versioned adapter file you improve over time, like a codebase.</p>',
+   rel:['scaling','finetune-when','recipe']},
+  {id:'distillation', term:'Distillation',
+   plain:'A big model teaches a small one: generate expert answers, train the student on them.',
+   gist:'Distillation transfers capability from a strong "teacher" model to a small "student". The practical form: use a frontier model to produce thousands of high-quality task examples (or reasoning traces), filter them, and fine-tune your small model on the result. Most impressive small models today were distilled from bigger siblings.',
+   why:'This is your data cheat code: you don’t need years of accumulated GraphQL examples — you need a good teacher prompt, a strong model for a weekend, and ruthless filtering.',
+   deeper:'<p>Classic distillation matched the teacher’s full probability distributions; the modern practical version is just SFT on teacher outputs, plus the crucial step everyone skips: <b>verification</b>. Only train on teacher outputs that pass checks (code compiles, query validates, tests pass) — otherwise you faithfully distill the teacher’s mistakes too.</p><p>Note: some API providers’ terms restrict using outputs to train competing models — read them; open-weight teachers avoid the question entirely.</p>',
+   rel:['synthetic','cot','sft']},
+  {id:'synthetic', term:'Synthetic training data',
+   plain:'Manufacturing your dataset: seed examples → generate variations → filter hard.',
+   gist:'The pattern: write 10–30 excellent seed examples by hand, then prompt a strong model to generate hundreds of variations — new inputs, matching ideal outputs — spanning difficulty levels and edge cases. Then filter mercilessly: validate programmatically where possible, spot-check by hand, dedupe. Generation is cheap; curation is the actual work.',
+   why:'For a GraphQL expert: seed with your real schemas and queries, generate variations across schema shapes and query complexity, auto-validate every sample against a parser before it enters the training set.',
+   deeper:'<p>Quality levers: <b>diversify inputs deliberately</b> (vary domain, length, difficulty, style in the generation prompt — otherwise you get 500 clones of your seeds), <b>generate hard negatives</b> (edge cases, ambiguous requests, invalid-input handling), and <b>close the loop</b> (whatever your eval says the model gets wrong, generate more training data of exactly that).</p><p>Watch for <b>model collapse</b> in miniature: training only on synthetic data narrows style and diversity. Anchor with real examples from your actual work whenever possible.</p>',
+   rel:['data','distillation','iterate']},
+  {id:'task-evals', term:'Task-specific evals',
+   plain:'Your specialist’s exam — written before training begins.',
+   gist:'Before training anything, build the test: 20–50 real tasks with automatic grading. For code experts, grading is gloriously objective: does it parse? compile? validate against the schema? pass the tests? Run every candidate model and every fine-tune version against it. The eval, not the loss curve, defines "better".',
+   why:'This converts fine-tuning from alchemy to engineering. It also gives you the before/after number that tells you whether the whole micro-expert project paid off.',
+   deeper:'<p>Design tips: include <b>tiers</b> (easy/medium/hard — a score of 100% means your eval is too easy to steer with), <b>traps</b> (cases where the model should refuse or ask for clarification), and <b>regression cases</b> (every real failure you ever find gets immortalized as a test).</p><p>Keep it runnable in one command and fast enough to run on every experiment. A simple script beats a fancy framework you won’t maintain — upgrade tooling only when the simple version hurts.</p>',
+   rel:['evals','splits','iterate']},
+  {id:'recipe', term:'The micro-expert recipe',
+   plain:'The end-to-end playbook, using a GraphQL specialist as the running example.',
+   gist:'Seven steps: (1) define the task narrowly; (2) build the eval first; (3) baseline existing models with good prompting; (4) build the dataset — real + synthetic, validated; (5) QLoRA-fine-tune a small base; (6) evaluate against the baseline; (7) deploy via Ollama and iterate on failures. Expect to loop steps 4–7 several times.',
+   why:'This card is the map for your first real project. Every step links to the concepts that power it.',
+   deeper:'<p><b>1. Scope</b>: "given a schema and a natural-language request, write a correct, idiomatic GraphQL operation." Narrow beats broad — resist adding resolver code until v2.</p><p><b>2. Eval</b>: 30 request+schema → expected-operation cases; grade with a GraphQL parser + schema validation + field-level comparison.</p><p><b>3. Baseline</b>: score Qwen-3B/8B-class models with a strong system prompt and few-shot examples. Maybe prompting alone hits 85% and you’re done — that’s a win too.</p><p><b>4. Data</b>: ~50 hand-written gold examples from your real work + a few hundred validated synthetic variations.</p><p><b>5. Train</b>: <code>mlx_lm.lora</code> on your Mac, rank 16, 2–3 epochs, watching validation loss.</p><p><b>6. Judge</b>: eval score vs. baseline; inspect every failure by hand.</p><p><b>7. Ship & loop</b>: fuse adapter → GGUF → <code>ollama create graphql-expert</code> → use it daily; every failure becomes next round’s training data.</p>',
+   rel:['task-evals','synthetic','qlora','ollama']},
+  {id:'serving', term:'Serving & integration',
+   plain:'A model becomes a product when something can call it.',
+   gist:'Once your expert lives in Ollama, it exposes a standard local API — wire it into scripts, editor extensions, git hooks, or a CLI. Because adapters are small, one base model can back several experts, swapping the active specialty in seconds.',
+   why:'Integration is where daily value appears: your GraphQL expert reviewing every query in pre-commit, or answering inside your editor with zero API cost.',
+   deeper:'<p>Patterns that work at personal scale: a <b>shell alias</b> piping into the model for quick asks; an <b>OpenAI-compatible endpoint</b> (Ollama’s) so existing tools plug in by changing a base URL; <b>structured-output mode</b> for anything a program consumes; and <b>keep-alive settings</b> so your daily-driver expert stays warm in memory. Version adapters like code — <code>graphql-expert:v3</code> — so a bad training run is a one-line rollback.</p>',
+   rel:['ollama','structured','routing']},
+  {id:'routing', term:'Routing & model teams',
+   plain:'Many small specialists + a dispatcher beats one mid-size generalist.',
+   gist:'With several experts on disk, add a router: a cheap classifier (or tiny LLM, or plain rules) that reads each request and forwards it to the right specialist — GraphQL expert, SQL expert, regex expert. This is mixture-of-experts thinking applied at the system level, and it’s how small local setups punch far above their weight.',
+   why:'This is the end-state architecture of your project: a personal team of masters, each swappable and improvable independently — plus a fallback to a generalist for everything else.',
+   deeper:'<p>Keep routing boring: keyword rules and file-type detection cover most personal setups; a 1B classifier model covers the rest. Always include a <b>fallback route</b> to a general model for out-of-scope requests, and log every routing decision — misroutes are eval cases for the router.</p><p>The same shape scales up: frontier systems increasingly blend specialized components behind dispatchers. Your laptop version is architecturally honest, just smaller.</p>',
+   rel:['agents','serving','microexperts-why']},
+  {id:'iterate', term:'The improvement loop',
+   plain:'Ship → collect failures → turn them into data → retrain → re-eval. Forever.',
+   gist:'A micro-expert is never finished; it compounds. Use it daily, capture every miss, convert misses into new eval cases and training examples, retrain, and compare scores before promoting the new version. Ten such cycles produce an expert nothing off-the-shelf can match, because it’s fitted to your exact work.',
+   why:'This loop is the durable moat — the model is replaceable, the base will change, but your eval + dataset improve monotonically and transfer to every future base model.',
+   deeper:'<p>Make capture frictionless: a one-keystroke way to flag a bad output (append to a <code>failures.jsonl</code>) determines whether the loop actually runs. Periodically: triage failures into <em>data gaps</em> (add examples), <em>task creep</em> (out of scope — route elsewhere or split off expert #2), and <em>base limits</em> (time to try a newer/bigger base).</p><p>When a new base model family lands, your assets carry over: re-run the same training data and eval against it, compare, migrate if it wins. That’s the quiet superpower of owning the data and the eval rather than the model.</p>',
+   rel:['task-evals','preference','data']},
+]},
+];
+
+/* ---------- state ---------- */
+const LS_KEY='mlfg-learned-v1';
+let learned=new Set(JSON.parse(localStorage.getItem(LS_KEY)||'[]'));
+let current=0, query='';
+const ALL=GUIDE.flatMap((c,ci)=>c.topics.map((t,ti)=>({...t,ci,ti})));
+const byId=Object.fromEntries(ALL.map(t=>[t.id,t]));
+const total=ALL.length;
+
+const nav=document.getElementById('nav');
+const main=document.getElementById('main');
+const searchEl=document.getElementById('search');
+
+function save(){localStorage.setItem(LS_KEY,JSON.stringify([...learned]))}
+function esc(s){return s.replace(/&/g,'&amp;').replace(/</g,'&lt;')}
+
+function renderNav(){
+  nav.innerHTML=GUIDE.map((c,i)=>{
+    const done=c.topics.filter(t=>learned.has(t.id)).length;
+    return `<button data-ch="${i}" class="${i===current&&!query?'active':''}">
+      <span class="numeral">${c.numeral}</span>
+      <span class="t">${c.title}</span>
+      <span class="n ${done===c.topics.length?'done':''}">${done}/${c.topics.length}</span>
+    </button>`;
+  }).join('');
+  const n=learned.size;
+  document.getElementById('ptext').textContent=`${n} / ${total}`;
+  document.getElementById('pbar').style.width=(n/total*100)+'%';
+}
+
+function cardHTML(t,num){
+  const open=t._open?'open':'', l=learned.has(t.id)?'learned':'';
+  const rel=(t.rel||[]).filter(r=>byId[r]);
+  return `<article class="card ${open} ${l}" id="card-${t.id}">
+    <button class="card-head" data-toggle="${t.id}" aria-expanded="${!!t._open}">
+      <span class="spec-id">${num}</span>
+      <span class="headmain">
+        <div class="term">${t.term}</div>
+        <div class="plain">${t.plain}</div>
+      </span>
+      <span class="chev">▸</span>
+    </button>
+    <div class="card-body">
+      <p class="gist">${t.gist}</p>
+      ${t.why?`<div class="why"><b>Why it matters for your goal</b>${t.why}</div>`:''}
+      ${t.deeper?`<details class="deeper"><summary>Go deeper</summary><div class="deep-body">${t.deeper}</div></details>`:''}
+      <div class="card-foot">
+        <button class="learn-btn" data-learn="${t.id}">${learned.has(t.id)?'Collected ✓':'Mark as learned'}</button>
+        ${rel.length?`<div class="rel">${rel.map(r=>`<button data-goto="${r}">${byId[r].term}</button>`).join('')}</div>`:''}
+      </div>
+    </div>
+  </article>`;
+}
+
+function renderMain(){
+  if(query){
+    const q=query.toLowerCase();
+    const hits=ALL.filter(t=>(t.term+' '+t.plain+' '+t.gist+' '+(t.deeper||'')).toLowerCase().includes(q));
+    main.innerHTML=`<div class="chapter-head">
+      <div class="kicker">Search</div>
+      <h2>“${esc(query)}”</h2>
+      <p>${hits.length} concept${hits.length===1?'':'s'} found across the guide.</p>
+    </div>
+    <div class="cards">${hits.map(t=>cardHTML(t,GUIDE[t.ci].numeral+'·'+String(t.ti+1).padStart(2,'0'))).join('')||'<p class="empty">Nothing in the guide matches that — yet.</p>'}</div>`;
+  }else{
+    const c=GUIDE[current];
+    const prev=GUIDE[current-1], next=GUIDE[current+1];
+    main.innerHTML=`<div class="chapter-head">
+      <div class="kicker">Chapter ${c.numeral} · ${c.topics.length} concepts</div>
+      <h2>${c.title}</h2>
+      <p>${c.desc}</p>
+    </div>
+    <div class="cards">${c.topics.map((t,i)=>cardHTML(t,c.numeral+'·'+String(i+1).padStart(2,'0'))).join('')}</div>
+    <div class="pager">
+      ${prev?`<button data-nav="${current-1}"><span>← Previous</span>${prev.title}</button>`:'<span></span>'}
+      ${next?`<button class="next" data-nav="${current+1}"><span>Next →</span>${next.title}</button>`:''}
+    </div>`;
+  }
+  window.scrollTo({top:0});
+}
+
+function render(){renderNav();renderMain()}
+
+document.addEventListener('click',e=>{
+  const el=e.target.closest('[data-ch],[data-toggle],[data-learn],[data-goto],[data-nav]');
+  if(!el)return;
+  if(el.dataset.ch!==undefined){query='';searchEl.value='';current=+el.dataset.ch;render();}
+  else if(el.dataset.nav!==undefined){current=+el.dataset.nav;render();}
+  else if(el.dataset.toggle){const t=byId[el.dataset.toggle];t._open=!t._open;
+    const card=document.getElementById('card-'+t.id);card.classList.toggle('open',t._open);
+    el.setAttribute('aria-expanded',t._open);}
+  else if(el.dataset.learn){const id=el.dataset.learn;
+    learned.has(id)?learned.delete(id):learned.add(id);save();
+    const card=document.getElementById('card-'+id);card.classList.toggle('learned',learned.has(id));
+    el.textContent=learned.has(id)?'Collected ✓':'Mark as learned';renderNav();}
+  else if(el.dataset.goto){const t=byId[el.dataset.goto];query='';searchEl.value='';
+    current=t.ci;t._open=true;render();
+    document.getElementById('card-'+t.id).scrollIntoView({behavior:'smooth',block:'center'});}
+});
+
+searchEl.addEventListener('input',()=>{query=searchEl.value.trim();renderMain();renderNav();});
+document.addEventListener('keydown',e=>{
+  if(e.key==='/'&&document.activeElement!==searchEl){e.preventDefault();searchEl.focus();}
+  if(e.key==='Escape'&&query){query='';searchEl.value='';render();}
+});
+document.getElementById('reset').addEventListener('click',()=>{
+  if(confirm('Clear all collected-concept progress?')){learned.clear();save();render();}
+});
+
+render();
+</script>
+</body>
+</html>
